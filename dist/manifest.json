@@ -85,7 +85,8 @@
   "optional_permissions": [],
   "host_permissions": [
     "*://*.schoology.com/*",
-    "*://lms.lausd.net/*"
+    "*://lms.lausd.net/*",
+    "https://*.supabase.co/*"
   ],
   "optional_host_permissions": [
     "*://*/*"

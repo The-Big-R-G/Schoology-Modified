@@ -1,0 +1,15 @@
+body { margin: 0; background: #f7f8fb; color: #1b1f2a; font: 14px system-ui, sans-serif; }
+.messages-shell { max-width: 960px; margin: 0 auto; padding: 24px; }
+header { display: flex; align-items: center; justify-content: space-between; }
+label { display: block; margin: 12px 0; font-weight: 600; }
+input, textarea, button { box-sizing: border-box; font: inherit; }
+input, textarea { display: block; width: 100%; margin-top: 4px; padding: 8px; border: 1px solid #b9c1d0; border-radius: 4px; }
+button { padding: 8px 12px; border: 0; border-radius: 4px; background: #2d6cdf; color: #fff; cursor: pointer; }
+button + button { margin-left: 8px; }
+.message-layout { display: grid; grid-template-columns: 220px 1fr; gap: 24px; margin-top: 24px; }
+#conversation-list, #message-list { padding: 0; list-style: none; }
+#conversation-list button { width: 100%; text-align: left; background: #e7ebf3; color: #1b1f2a; }
+#message-list { min-height: 240px; padding: 12px; background: #fff; border: 1px solid #dbe0ea; border-radius: 4px; }
+#message-list li { margin: 8px 0; padding: 8px; background: #eef3ff; border-radius: 4px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.messages-error { color: #b42318; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

@@ -36,6 +36,32 @@
 #splus-gpa-setting h2 { margin-top: 0; }
 #splus-gpa-setting select { display: block; margin-top: 8px; }
 
+.splus-file-drop-target {
+    outline: 3px dashed var(--primary-color) !important;
+    outline-offset: 4px;
+}
+
+.splus-drop-enabled {
+    position: relative !important;
+}
+
+.splus-drop-input {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0 !important;
+    cursor: copy !important;
+    z-index: 10 !important;
+}
+
+.splus-profile-version {
+    padding: 4px 16px 8px;
+    color: var(--contrast-text-color);
+    font-size: 11px;
+    opacity: 0.8;
+}
+
 /* Navbar items */
 
 ._1SIMq {
