@@ -15,11 +15,13 @@ const commonConfig = {
         offscreen: path.join(srcDir, "scripts/offscreen.ts"),
         "theme-editor": path.join(srcDir, "scripts/theme-editor.ts"),
         "default-icons-page": path.join(srcDir, "scripts/default-icons-page.ts"),
+        messages: path.join(srcDir, "scripts/messages.ts"),
 
         // CSS Entry Points
         "styles/all": path.join(srcDir, "styles/all.scss"),
         "styles/modern/all": path.join(srcDir, "styles/modern/all.scss"),
         "styles/theme-editor": path.join(srcDir, "styles/theme-editor.scss"),
+        "styles/messages": path.join(srcDir, "styles/messages.scss"),
         "styles/modern/theme-editor": path.join(srcDir, "styles/modern/theme-editor.scss"),
         "lib/jquery-ui": path.join(srcDir, "../node_modules/jquery-ui/themes/base/all.css"),
         "lib/contextmenu": path.join(

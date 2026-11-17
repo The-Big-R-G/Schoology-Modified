@@ -420,6 +420,24 @@ export const Settings = {
             },
         }
     ),
+    GpaDisplay: new SPlusSetting<"both" | "weighted" | "unweighted" | "disabled">(
+        "gpaDisplay",
+        "GPA Display",
+        "Shows weighted and/or unweighted GPA on the Grades page. Weighted courses are identified by course titles containing AP, IB, Honors, Advanced, or Accelerated.",
+        "both",
+        "select",
+        "sync",
+        {
+            config: {
+                options: [
+                    { text: "Weighted and unweighted", value: "both" },
+                    { text: "Weighted only", value: "weighted" },
+                    { text: "Unweighted only", value: "unweighted" },
+                    { text: "Hide GPA", value: "disabled" },
+                ],
+            },
+        }
+    ),
     DesktopNotifications: new SPlusSetting<"enabled" | "badge" | "popup" | "disabled">(
         "notifications",
         "Desktop Notifications",
@@ -733,58 +751,6 @@ export const Settings = {
         0,
         "text",
         "local",
-        {
-            config: {
-                disabled: true,
-            },
-        }
-    ),
-    ApiKey: new SPlusSetting<string | undefined>(
-        "apikey",
-        "API Key",
-        "The API key for the Schoology API",
-        undefined,
-        "text",
-        "sync",
-        {
-            config: {
-                disabled: true,
-            },
-        }
-    ),
-    ApiSecret: new SPlusSetting<string | undefined>(
-        "apisecret",
-        "API Secret",
-        "The API secret for the Schoology API",
-        undefined,
-        "text",
-        "sync",
-        {
-            config: {
-                disabled: true,
-            },
-        }
-    ),
-    ApiUser: new SPlusSetting<number | undefined>(
-        "apiuser",
-        "API User",
-        "The User ID for the Schoology API",
-        undefined,
-        "text",
-        "sync",
-        {
-            config: {
-                disabled: true,
-            },
-        }
-    ),
-    ApiStatus: new SPlusSetting<"allowed" | "denied" | "blocked" | undefined>(
-        "apiStatus",
-        "API Status",
-        "The status of the API",
-        undefined,
-        "text",
-        "sync",
         {
             config: {
                 disabled: true,

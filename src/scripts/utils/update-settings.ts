@@ -85,27 +85,13 @@ export async function updateSettings() {
                 Settings.CustomGradingScales.settingsMenuElement,
                 Settings.CourseOrderMethod.settingsMenuElement,
                 Settings.WeightedGradebookIndicator.settingsMenuElement,
+                Settings.GpaDisplay.settingsMenuElement,
             ]),
             createElement("div", [], { id: "splus-settings-section-utilities" }, [
                 Settings.DesktopNotifications.settingsMenuElement,
                 Settings.Broadcasts.settingsMenuElement,
                 Settings.BypassLinkRedirects.settingsMenuElement,
                 Settings.PersistSessionCookies.settingsMenuElement,
-                createElement("div", ["setting-entry"], {}, [
-                    createElement("h2", ["setting-title"], {}, [
-                        createElement("a", [], {
-                            href: "#",
-                            textContent: "Change Schoology Account Access",
-                            onclick: () => {
-                                location.pathname = "/api";
-                            },
-                            style: { fontSize: "" },
-                        }),
-                    ]),
-                    createElement("p", ["setting-description"], {
-                        textContent: `Grant ${EXTENSION_NAME} access to your Schoology API Key so many features can function, or revoke that access.`,
-                    }),
-                ]),
                 getBrowser() !== "Firefox"
                     ? createElement("div", ["setting-entry"], {}, [
                           createElement("h2", ["setting-title"], {}, [

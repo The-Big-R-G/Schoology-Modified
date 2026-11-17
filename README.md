@@ -2,6 +2,17 @@
 
 ### Schoology Plus is a web extension that enhances your Schoology experience with numerous interface improvements.
 
+## Load the extension locally
+
+Install dependencies and build the extension:
+
+```sh
+npm install
+npm run build
+```
+
+In Chrome or Edge, open the extensions page, enable Developer mode, choose **Load unpacked**, and select the generated `dist` folder. The extension manifest is inside `dist/manifest.json`.
+
 [![Chrome Download](https://img.shields.io/chrome-web-store/v/fbfppoaockpecjpbdmldojdehdpepfef.svg?label=chrome%20download)](https://chrome.google.com/webstore/detail/schoology-plus/fbfppoaockpecjpbdmldojdehdpepfef)
 [![Chrome Web Store Users](https://img.shields.io/chrome-web-store/users/fbfppoaockpecjpbdmldojdehdpepfef.svg)](https://chrome.google.com/webstore/detail/schoology-plus/fbfppoaockpecjpbdmldojdehdpepfef)
 [![Mozilla Add-on](https://img.shields.io/amo/v/schoology-plus?color=orange&label=firefox%20download)](https://addons.mozilla.org/en-US/firefox/addon/schoology-plus/)

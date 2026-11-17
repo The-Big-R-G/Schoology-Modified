@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Schoology Plus Messages</title>
+  <link rel="stylesheet" href="styles/messages.css">
+</head>
+<body>
+  <main class="messages-shell">
+    <header><h1>Messages</h1><button id="sign-out" hidden>Sign out</button></header>
+    <p id="status" role="status"></p>
+
+    <section id="configuration">
+      <h2>Connect Messages</h2>
+      <p>Enter your Supabase project URL and publishable key. These values identify the project; do not enter a service role key.</p>
+      <label>Project URL <input id="supabase-url" type="url" placeholder="https://your-project.supabase.co" required></label>
+      <label>Publishable key <input id="supabase-key" type="password" autocomplete="off" required></label>
+      <button id="save-configuration">Save connection</button>
+    </section>
+
+    <section id="authentication" hidden>
+      <h2>Sign in</h2>
+      <label>Username <input id="auth-username" type="text" autocomplete="username" pattern="[A-Za-z0-9_]{3,30}" placeholder="3–30 letters, numbers, or underscores" required></label>
+      <label>Password <input id="auth-password" type="password" autocomplete="current-password" minlength="8" required></label>
+      <div><button id="sign-in">Sign in</button><button id="sign-up">Create account</button></div>
+    </section>
+
+    <section id="inbox" hidden>
+      <form id="new-conversation"><label>Message username <input id="recipient" type="text" pattern="[A-Za-z0-9_]{3,30}" required></label><button>Start chat</button></form>
+      <div class="message-layout"><aside><h2>Conversations</h2><ul id="conversation-list"></ul></aside><section><h2 id="conversation-title">Choose a conversation</h2><ol id="message-list" aria-live="polite"></ol><form id="message-form" hidden><label class="visually-hidden" for="message-body">Message</label><textarea id="message-body" maxlength="2000" required></textarea><button>Send</button></form></section></div>
+    </section>
+  </main>
+  <script src="messages.js"></script>
+</body>
+</html>

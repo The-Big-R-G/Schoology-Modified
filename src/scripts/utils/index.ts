@@ -1,5 +1,4 @@
 export * as analytics from "./analytics";
-export * as api from "./api";
 export * as beta from "./beta";
 export * as broadcast from "./broadcast";
 export * as constants from "./constants";

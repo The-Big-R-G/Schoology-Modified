@@ -125,10 +125,6 @@ async function load() {
         values: [0, 100],
     });
 
-    initializeDragAndDrop(themeCursor, null, "value");
-    initializeDragAndDrop(themeLogo, null, "value");
-    themeCursor.addEventListener("paste", uploadAndPaste);
-    themeLogo.addEventListener("paste", uploadAndPaste);
 
     let oninput = (e: Event) =>
         (document.getElementById((e.target as HTMLElement).dataset.label!)!.textContent = (
@@ -1780,7 +1776,7 @@ function addIcon() {
         legacyAction: "click",
         legacyLabel: "Theme Editor",
     });
-    let template = `<td style=text-align:center><a class="action-button tooltipped arrow-button move-down"data-tooltip="Move Down"><i class=material-icons>arrow_downward</i> </a><a class="action-button tooltipped arrow-button move-up"data-tooltip="Move Up"><i class=material-icons>arrow_upward</i></a><td class=class-name data-text="Class Name Pattern"><td class=icon-url data-text="Icon URL or paste/drop image"><td><img class="small-icon-preview" height=32/></td><td><a class="action-button tooltipped btn-flat delete-icon-button right waves-effect waves-light"data-tooltip=Delete><i class=material-icons>delete</i></a>`;
+    let template = `<td style=text-align:center><a class="action-button tooltipped arrow-button move-down"data-tooltip="Move Down"><i class=material-icons>arrow_downward</i> </a><a class="action-button tooltipped arrow-button move-up"data-tooltip="Move Up"><i class=material-icons>arrow_upward</i></a><td class=class-name data-text="Class Name Pattern"><td class=icon-url data-text="Icon URL"><td><img class="small-icon-preview" height=32/></td><td><a class="action-button tooltipped btn-flat delete-icon-button right waves-effect waves-light"data-tooltip=Delete><i class=material-icons>delete</i></a>`;
     let tr = document.createElement("tr");
     tr.innerHTML = template;
     iconList.appendChild(tr);
@@ -1790,13 +1786,6 @@ function addIcon() {
     tr.querySelector(".delete-icon-button")?.addEventListener("click", deleteIcon);
 
     // Replaces pasted images with data urls
-    tr.querySelector(".icon-url")?.addEventListener("paste", uploadAndPaste);
-
-    initializeDragAndDrop(
-        tr.querySelector<HTMLInputElement>(".icon-url")!,
-        tr.querySelector(".small-icon-preview"),
-        "textContent"
-    );
 
     // Replaces pasted HTML with plain text
     tr.querySelector(".class-name")?.addEventListener("paste", plainTextPaste);
@@ -1820,66 +1809,6 @@ function addIcon() {
         arr.map(x => x.addEventListener("input", updateOutput));
     }
     return tr;
-}
-
-function uploadAndPaste(pasteEvent: Event | JQuery.Event) {
-    let items = (
-        (pasteEvent as ClipboardEvent).clipboardData ||
-        ((pasteEvent as JQuery.Event).originalEvent as ClipboardEvent).clipboardData
-    )?.items;
-    let blob = null;
-    for (let i of items ?? []) {
-        if (i.type.indexOf("image") === 0) {
-            blob = i.getAsFile();
-        }
-    }
-    if (blob !== null) {
-        pasteEvent.preventDefault();
-        pasteEvent.stopPropagation();
-        let pasteElement = pasteEvent.target as HTMLElement;
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            let text = (e.target as FileReader).result;
-            pasteElement.dataset.originalText = pasteElement.dataset.text;
-            pasteElement.dataset.text = "Uploading...";
-            let t = M.toast({ html: `Uploading image...`, displayLength: Number.MAX_SAFE_INTEGER });
-            imgurUpload(
-                text?.toString(),
-                result => {
-                    t.dismiss();
-                    let link = result.data.link;
-                    if (document.queryCommandSupported("insertText")) {
-                        document.execCommand("insertText", false, link);
-                    } else {
-                        document.execCommand("paste", false, link);
-                    }
-                    trackEvent("perform_action", {
-                        id: "paste",
-                        context: "Theme Editor",
-                        value: "icon-image",
-                        legacyTarget: "icon-image",
-                        legacyAction: "paste",
-                        legacyLabel: "Theme Editor",
-                    });
-                    // preview.src = link;
-                    pasteElement.dataset.text = pasteElement.dataset.originalText;
-                    pasteElement.dataset.originalText = "";
-                    updateOutput();
-                },
-                error => {
-                    t.dismiss();
-                    M.toast({
-                        html: `Uploading image failed: ${error.message || error.toString()}`,
-                    });
-                    pasteElement.dataset.text = pasteElement.dataset.originalText;
-                    pasteElement.dataset.originalText = "";
-                }
-            );
-        };
-        reader.readAsDataURL(blob);
-    } else {
-        plainTextPaste(pasteEvent);
-    }
 }
 
 function plainTextPaste(e: Event | JQuery.Event) {
@@ -1984,178 +1913,11 @@ function inEditMode() {
     return !!document.querySelector(".show-editor-controls");
 }
 
-function preventDefaults(e: Event) {
-    e.preventDefault();
-    e.stopPropagation();
-}
-
-function highlight(region: HTMLElement) {
-    if (!region.classList.contains("highlight")) {
-        region.classList.add("highlight");
-        region.dataset.originalText = region.dataset.text;
-        region.dataset.text = "Drop to Use Image";
-    }
-}
-
-function unhighlight(region: HTMLElement) {
-    if (region.classList.contains("highlight")) {
-        region.classList.remove("highlight");
-        region.dataset.text = region.dataset.originalText;
-        region.dataset.originalText = "";
-    }
-}
-
-function handleDrop(
-    e: DragEvent,
-    region: HTMLInputElement,
-    preview: HTMLImageElement | null,
-    property: "value" | "textContent"
-) {
-    try {
-        if (e.dataTransfer && e.dataTransfer.files.length > 0) {
-            let file = e.dataTransfer.files[0];
-            let reader = new FileReader();
-            reader.onloadend = () => {
-                region.dataset.originalText = region.dataset.text;
-                region.dataset.text = "Uploading...";
-                let t = M.toast({
-                    html: `Uploading image...`,
-                    displayLength: Number.MAX_SAFE_INTEGER,
-                });
-
-                imgurUpload(
-                    reader.result?.toString(),
-                    result => {
-                        success(result.data.link, t);
-                    },
-                    error => {
-                        t.dismiss();
-                        M.toast({
-                            html: `Uploading image failed: ${error.message || error.toString()}`,
-                        });
-                        region.dataset.text = region.dataset.originalText;
-                        region.dataset.originalText = "";
-                    }
-                );
-            };
-            reader.readAsDataURL(file);
-        } else if (e.dataTransfer && e.dataTransfer.items.length >= 3) {
-            e.dataTransfer.items[2].getAsString(s => {
-                let img = htmlToElement<HTMLImageElement>(s);
-                success(img.src);
-            });
-        }
-    } catch (err) {
-        M.toast({ html: `Error: Invalid image file` });
-        Logger.error(err);
-    }
-
-    function success(link: string, toast?: M.Toast) {
-        trackEvent("perform_action", {
-            id: "drop",
-            context: "Theme Editor",
-            value: "icon-image",
-            legacyTarget: "icon-image",
-            legacyAction: "drop",
-            legacyLabel: "Theme Editor",
-        });
-        if (toast) {
-            toast.dismiss();
-        }
-        if (preview) {
-            preview.src = link;
-        }
-        region[property] = link;
-        region.dataset.text = region.dataset.originalText;
-        region.dataset.originalText = "";
-        updateOutput();
-    }
-}
-
 function htmlToElement<T extends HTMLElement = HTMLElement>(html: string): T {
     var template = document.createElement("template");
     html = html.trim();
     template.innerHTML = html;
     return template.content.firstChild as T;
-}
-
-function imgurUpload(
-    base64: string | null | undefined,
-    callback: (json: any) => void,
-    errorCallback: (err: any) => void
-) {
-    if (!base64) {
-        errorCallback(new Error("Invalid URL"));
-        return;
-    }
-
-    if (!localStorage.getItem("imgurPromptViewed")) {
-        ConfirmModal.open(
-            "Imgur Upload Consent",
-            "By clicking 'agree', you consent to have the image you just dropped or pasted uploaded to Imgur. Click cancel to prevent the upload. If you click 'agree' this message will not be shown again.",
-            ["Agree", "Cancel"],
-            b => {
-                if (b === "Agree") {
-                    localStorage.setItem("imgurPromptViewed", "true");
-                    doUpload();
-                } else {
-                    errorCallback(new Error("User did not give consent to upload"));
-                }
-            }
-        );
-    } else {
-        doUpload();
-    }
-
-    function doUpload() {
-        const CLIENT_ID = "56755c36eb5772d";
-        fetch("https://api.imgur.com/3/image", {
-            method: "POST",
-            mode: "cors",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Client-ID ${CLIENT_ID}`,
-            },
-            body: JSON.stringify({
-                type: "base64",
-                image: base64!.split(",")[1],
-            }),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(response.statusText);
-                }
-                return response;
-            })
-            .then(x => x.json())
-            .then(callback)
-            .catch(err => {
-                Logger.log(err);
-                errorCallback(err);
-            });
-    }
-}
-
-function initializeDragAndDrop(
-    region: HTMLInputElement,
-    preview: HTMLImageElement | null,
-    property: "value" | "textContent"
-) {
-    ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
-        region.addEventListener(eventName, preventDefaults, false);
-    });
-    ["dragenter", "dragover"].forEach(eventName => {
-        region.addEventListener(eventName, e => highlight(region), false);
-    });
-    region.addEventListener("dragleave", e => unhighlight(region), false);
-    region.addEventListener(
-        "drop",
-        e => {
-            unhighlight(region);
-            handleDrop(e, region, preview, property);
-        },
-        false
-    );
 }
 
 function hueSliderEvent(event: JQuery.Event | Event, ui: JQueryUI.SliderUIParams) {

@@ -64,20 +64,8 @@ async function load() {
         await pages.course.load();
     }
 
-    if (
-        matchPage(
-            /^\/course\/\d+\/materials$/ // matches /course/1234/materials
-        )
-    ) {
-        await pages.materials.load();
-    }
-
-    if (
-        matchPage(
-            /^\/course\/\d+\/materials\// // matches /course/1234/materials/(...)
-        )
-    ) {
-        await pages.material.load();
+    if (matchPage(/^\/settings\/account$/)) {
+        await pages.accountSettings.load();
     }
 
     if (
@@ -102,23 +90,7 @@ async function load() {
 
     if (
         matchPage(
-            /^\/api/ // matches /api(...)
-        )
-    ) {
-        await pages.apikey.load();
-    }
-
-    if (
-        matchPage(
-            /^\/user\/\d+$/ // matches /user/1234
-        )
-    ) {
-        await pages.user.load();
-    }
-
-    if (
-        matchPage(
-            /^\/assignment\/\d+\/assessment$/ // matches /assignment/1234/assessment
+            /^\/assignment\/\d+(?:\/assessment|\/dropbox\/submit)?$/ // matches assignment submission pages
         )
     ) {
         await pages.assessment.load();
@@ -143,8 +115,6 @@ async function load() {
 
     globalThis.SchoologyPlus = {
         Settings,
-        fetchApi: utils.api.fetchApi,
-        fetchApiJson: utils.api.fetchApiJson,
         utils,
         pages,
         debug: JSON.parse(generateDebugInfo()),
