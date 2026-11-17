@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 type Message = { id: string; body: string; created_at: string; sender_id: string };
+type Profile = { id: string; username: string };
 type Configuration = { url: string; key: string };
 
 const DEFAULT_CONFIGURATION: Configuration = {
@@ -103,9 +104,22 @@ async function loadMessages() {
     if (error) return status(error.message, true);
     const list = element<HTMLOListElement>("message-list");
     list.replaceChildren();
-    for (const message of (data ?? []) as Message[]) {
+    const messages = (data ?? []) as Message[];
+    const senderIds = [...new Set(messages.map(message => message.sender_id))];
+    const { data: profiles } = senderIds.length
+        ? await client.from("profiles").select("id, username").in("id", senderIds)
+        : { data: [] as Profile[] };
+    const usernames = new Map((profiles ?? []).map((profile: Profile) => [profile.id, profile.username]));
+
+    for (const message of messages) {
         const item = document.createElement("li");
-        item.textContent = message.body;
+        const sender = document.createElement("strong");
+        sender.className = "message-sender";
+        sender.textContent = usernames.get(message.sender_id) ?? "Unknown user";
+        const body = document.createElement("span");
+        body.className = "message-body";
+        body.textContent = message.body;
+        item.append(sender, body);
         item.title = new Date(message.created_at).toLocaleString();
         list.append(item);
     }

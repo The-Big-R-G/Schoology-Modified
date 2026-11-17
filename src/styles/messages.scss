@@ -11,5 +11,7 @@ button + button { margin-left: 8px; }
 #conversation-list button { width: 100%; text-align: left; background: #e7ebf3; color: #1b1f2a; }
 #message-list { min-height: 240px; padding: 12px; background: #fff; border: 1px solid #dbe0ea; border-radius: 4px; }
 #message-list li { margin: 8px 0; padding: 8px; background: #eef3ff; border-radius: 4px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.message-sender, .message-body { display: block; }
+.message-sender { margin-bottom: 3px; color: #294c87; font-size: 12px; }
 .messages-error { color: #b42318; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
