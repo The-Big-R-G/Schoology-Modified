@@ -114,7 +114,7 @@ function addMessagesButton() {
                     id: "splus-messages-navbar-button",
                     textContent: "Messages",
                     title: "Open Schoology Plus Messages",
-                    onclick: () => chrome.tabs.create({ url: chrome.runtime.getURL("messages.html") }),
+                    onclick: () => chrome.runtime.sendMessage({ type: "openMessages" }),
                 }
             ),
         ])

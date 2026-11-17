@@ -163,7 +163,11 @@ function onMessage(
 ) {
     Logger.log("Received background page message", request);
 
-    if (request.type == "fetch" && request.url !== undefined) {
+    if (request.type == "openMessages") {
+        chrome.tabs.create({ url: chrome.runtime.getURL("messages.html") });
+        sendResponse({ success: true });
+        return true;
+    } else if (request.type == "fetch" && request.url !== undefined) {
         Logger.debug("Received fetch request for " + request.url);
 
         (async function () {
