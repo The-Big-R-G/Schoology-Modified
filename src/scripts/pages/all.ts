@@ -59,6 +59,7 @@ export async function load() {
     pageModifications();
     await handleNewVersion();
     activateEasterEgg();
+    addMessagesButton();
     addDarkThemeToggleButton();
     addSplusSettingsButton();
     fixNavbarSvgIconColors();
@@ -76,6 +77,48 @@ export async function load() {
     displayAssessmentDarkThemeWarningMessage();
     addVersionToProfileMenu();
     createSettingsHashListener();
+}
+
+function addMessagesButton() {
+    const navigation = document.querySelector<HTMLUListElement>(
+        "#header > header > nav > ul:nth-child(2)"
+    );
+    if (!navigation || document.getElementById("splus-messages-navbar-button")) return;
+    navigation.prepend(
+        createElement("li", ["_24avl", "_3Rh90", "_349XD"], {}, [
+            createElement(
+                "button",
+                [
+                    "_1SIMq",
+                    "_2kpZl",
+                    "_3OAXJ",
+                    "_13cCs",
+                    "_3_bfp",
+                    "_2M5aC",
+                    "_24avl",
+                    "_3v0y7",
+                    "_2s0LQ",
+                    "_3ghFm",
+                    "_3LeCL",
+                    "_31GLY",
+                    "_9GDcm",
+                    "_1D8fw",
+                    "util-height-six-3PHnk",
+                    "util-line-height-six-3lFgd",
+                    "util-text-decoration-none-1n0lI",
+                    "Header-header-button-active-state-3AvBm",
+                    "Header-header-button-1EE8Y",
+                    "splus-messages-button",
+                ],
+                {
+                    id: "splus-messages-navbar-button",
+                    textContent: "Messages",
+                    title: "Open Schoology Plus Messages",
+                    onclick: () => chrome.tabs.create({ url: chrome.runtime.getURL("messages.html") }),
+                }
+            ),
+        ])
+    );
 }
 
 export async function preload() {
