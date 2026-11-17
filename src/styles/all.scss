@@ -41,6 +41,20 @@
     outline-offset: 4px;
 }
 
+.splus-drop-enabled {
+    position: relative !important;
+}
+
+.splus-drop-input {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0 !important;
+    cursor: copy !important;
+    z-index: 10 !important;
+}
+
 /* Navbar items */
 
 ._1SIMq {

@@ -122,7 +122,9 @@ function setupSubmissionFileDrop() {
     };
 
     const insertFiles = (files: FileList) => {
-        const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+        const fileInput = document.querySelector<HTMLInputElement>(
+            'input[type="file"]:not(.splus-drop-input)'
+        );
         if (!fileInput) return false;
         const transfer = new DataTransfer();
         Array.from(files).forEach(file => transfer.items.add(file));
@@ -160,6 +162,7 @@ function setupSubmissionFileDrop() {
         event => {
             const dragEvent = event as DragEvent;
             const button = getDropboxButton(event.target);
+            if ((event.target as HTMLElement)?.classList?.contains("splus-drop-input")) return;
             if (!button || !dragEvent.dataTransfer?.types.includes("Files")) return;
             dragEvent.preventDefault();
             activeDropboxButton?.classList.remove("splus-file-drop-target");
@@ -172,6 +175,7 @@ function setupSubmissionFileDrop() {
         "drop",
         event => {
             const dragEvent = event as DragEvent;
+            if ((event.target as HTMLElement)?.classList?.contains("splus-drop-input")) return;
             const button = getDropboxButton(event.target) || activeDropboxButton;
             if (!button || !dragEvent.dataTransfer?.files.length) return;
             dragEvent.preventDefault();
@@ -198,6 +202,17 @@ function setupSubmissionFileDrop() {
         for (const button of buttons) {
             if (attached.has(button)) continue;
             attached.add(button);
+
+            const dropInput = document.createElement("input");
+            dropInput.type = "file";
+            dropInput.multiple = true;
+            dropInput.className = "splus-drop-input";
+            dropInput.setAttribute("aria-label", "Drop files to submit assignment");
+            dropInput.addEventListener("change", () => {
+                if (dropInput.files?.length) insertFilesAfterOpening(button, dropInput.files);
+            });
+            button.classList.add("splus-drop-enabled");
+            button.appendChild(dropInput);
 
             button.addEventListener("dragover", event => {
                 if (!(event as DragEvent).dataTransfer?.types.includes("Files")) return;
