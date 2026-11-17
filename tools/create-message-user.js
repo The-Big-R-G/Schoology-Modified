@@ -1,5 +1,20 @@
 /* eslint-disable no-console */
+const fs = require("fs");
+const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
+
+function loadLocalEnvironment() {
+    const environmentFile = path.resolve(__dirname, "../.env");
+    if (!fs.existsSync(environmentFile)) return;
+    for (const line of fs.readFileSync(environmentFile, "utf8").split(/\r?\n/)) {
+        const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+        if (!match || process.env[match[1]] !== undefined) continue;
+        const value = match[2].replace(/^(['"])(.*)\1$/, "$2");
+        process.env[match[1]] = value;
+    }
+}
+
+loadLocalEnvironment();
 
 const [providedUsername, password] = process.argv.slice(2);
 const username = providedUsername?.trim().toLowerCase();
@@ -7,8 +22,8 @@ const projectUrl = process.env.SUPABASE_URL || "https://sksjloysptdwsbsgpgtg.sup
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!username || !password || !serviceRoleKey) {
-    console.error("Usage: SUPABASE_SERVICE_ROLE_KEY=... npm run create:message-user -- <username> <password>");
-    console.error("Username: 3–30 letters, numbers, or underscores. Keep the service-role key private.");
+    console.error("Usage: npm run create:message-user -- <username> <password>");
+    console.error("Add SUPABASE_SERVICE_ROLE_KEY to .env first. Keep that key private.");
     process.exit(1);
 }
 

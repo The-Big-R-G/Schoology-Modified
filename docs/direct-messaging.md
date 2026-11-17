@@ -15,10 +15,16 @@ This extension now includes a user-visible Messages page. It keeps the realtime 
 
 The account command runs only on your computer and uses a Supabase service-role key. That key has full database access: never put it in extension code, Git, screenshots, or a shared terminal history.
 
-In the project folder, run:
+Add the service-role key to the local `.env` file (it is already Git-ignored):
 
 ```sh
-SUPABASE_SERVICE_ROLE_KEY='your-service-role-key' npm run create:message-user -- username 'strong-password'
+SUPABASE_SERVICE_ROLE_KEY='your-service-role-key'
+```
+
+Then, in the project folder, run:
+
+```sh
+npm run create:message-user -- username 'strong-password'
 ```
 
 It creates a confirmed account and its matching profile, so no confirmation email is sent or required. Running it again for the same username resets that account's password. Retrieve the service-role key only from the project dashboard under **Settings → API**. The publishable key will not work for this command.
