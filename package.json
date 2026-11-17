@@ -4,6 +4,7 @@
   "description": "Schoology Plus enhances your Schoology experience with numerous interface improvements",
   "scripts": {
     "build": "rm -rf dist/* && webpack --config webpack.config.js --mode=development && node build.js chrome-dist",
+    "create:message-user": "node tools/create-message-user.js",
     "prod": "node build.js verify && rm -rf dist/* && webpack --config webpack.config.js --mode=production && node build.js production",
     "clean": "rimraf dist",
     "prettier": "prettier --write \"src/**/*.ts\""
