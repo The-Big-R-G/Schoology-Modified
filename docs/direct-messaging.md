@@ -21,7 +21,7 @@ In the project folder, run:
 SUPABASE_SERVICE_ROLE_KEY='your-service-role-key' npm run create:message-user -- username 'strong-password'
 ```
 
-It creates a confirmed account and its matching profile, so no confirmation email is sent or required. Retrieve the service-role key only from the project dashboard under **Settings → API**. The publishable key will not work for this command.
+It creates a confirmed account and its matching profile, so no confirmation email is sent or required. Running it again for the same username resets that account's password. Retrieve the service-role key only from the project dashboard under **Settings → API**. The publishable key will not work for this command.
 
 ## Security model
 

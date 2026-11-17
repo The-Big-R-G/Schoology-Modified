@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
 const { createClient } = require("@supabase/supabase-js");
 
-const [username, password] = process.argv.slice(2);
+const [providedUsername, password] = process.argv.slice(2);
+const username = providedUsername?.trim().toLowerCase();
 const projectUrl = process.env.SUPABASE_URL || "https://sksjloysptdwsbsgpgtg.supabase.co";
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -28,7 +29,30 @@ const client = createClient(projectUrl, serviceRoleKey, {
 async function createMessageUser() {
     // The internal email supports normal password sign-in while keeping the
     // extension's username-only interface.
-    const email = `${username.toLowerCase()}@schoologyplus.local`;
+    const email = `${username.toLowerCase()}@schoologyplus.invalid`;
+    const { data: existingProfile, error: existingProfileError } = await client
+        .from("profiles")
+        .select("id")
+        .eq("username", username)
+        .maybeSingle();
+
+    if (existingProfileError) {
+        throw new Error(`Could not check for an existing profile: ${existingProfileError.message}`);
+    }
+
+    // This also repairs accounts made by the first version of this script,
+    // which used the obsolete .local internal email address.
+    if (existingProfile) {
+        const { error } = await client.auth.admin.updateUserById(existingProfile.id, {
+            email,
+            password,
+            email_confirm: true,
+        });
+        if (error) throw new Error(error.message);
+        console.log(`Updated confirmed message account for ${username}.`);
+        return;
+    }
+
     const { data, error } = await client.auth.admin.createUser({
         email,
         password,
