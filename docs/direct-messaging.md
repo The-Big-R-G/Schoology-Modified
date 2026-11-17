@@ -4,7 +4,7 @@ This extension now includes a user-visible Messages page. It keeps the realtime 
 
 ## Supabase setup
 
-1. Create a Supabase project and enable Email/Password sign-in.
+1. Create a Supabase project and enable Email/Password sign-in. Disable **Confirm email** in Authentication settings: the extension derives a private internal email identifier from each username, so users only enter a username and password.
 2. Run `supabase/migrations/20261117000000_create_direct_messages.sql` in the project SQL editor, or create and apply the migration with the Supabase CLI.
 3. Confirm that `messages` is included in the `supabase_realtime` publication. The migration adds it for a new project.
 4. Open the extension popup and choose **Open Messages**.

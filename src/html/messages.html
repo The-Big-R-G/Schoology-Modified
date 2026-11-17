@@ -21,9 +21,8 @@
 
     <section id="authentication" hidden>
       <h2>Sign in</h2>
-      <label>Email <input id="auth-email" type="email" autocomplete="email" required></label>
+      <label>Username <input id="auth-username" type="text" autocomplete="username" pattern="[A-Za-z0-9_]{3,30}" placeholder="3–30 letters, numbers, or underscores" required></label>
       <label>Password <input id="auth-password" type="password" autocomplete="current-password" minlength="8" required></label>
-      <label>Username <input id="auth-username" type="text" autocomplete="username" pattern="[A-Za-z0-9_]{3,30}" placeholder="Used to find you" required></label>
       <div><button id="sign-in">Sign in</button><button id="sign-up">Create account</button></div>
     </section>
 

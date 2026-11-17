@@ -25,6 +25,10 @@ const storage = {
     removeItem: async (key: string) => chrome.storage.local.remove(key),
 };
 
+const usernamePattern = /^[A-Za-z0-9_]{3,30}$/;
+const internalEmailFor = (username: string) => `${username.toLowerCase()}@schoologyplus.invalid`;
+const usernameFromInternalEmail = (email?: string) => email?.replace(/@schoologyplus\.invalid$/i, "") ?? "";
+
 function createMessagingClient(configuration: Configuration) {
     client = createClient(configuration.url, configuration.key, {
         auth: { storage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
@@ -53,11 +57,10 @@ async function refreshSession() {
     const { data, error } = await client.auth.getUser();
     if (error || !data.user) return show("authentication");
     show("inbox");
-    await client.from("profiles").upsert({
-        id: data.user.id,
-        username: element<HTMLInputElement>("auth-username").value || data.user.email!.split("@")[0],
-        display_name: data.user.email,
-    });
+    const username = element<HTMLInputElement>("auth-username").value.trim().toLowerCase() || usernameFromInternalEmail(data.user.email);
+    if (usernamePattern.test(username)) {
+        await client.from("profiles").upsert({ id: data.user.id, username, display_name: username });
+    }
     await loadConversations();
 }
 
@@ -121,13 +124,12 @@ async function saveConfiguration() {
 
 async function authenticate(mode: "signInWithPassword" | "signUp") {
     if (!client) return;
-    const email = element<HTMLInputElement>("auth-email").value.trim();
     const password = element<HTMLInputElement>("auth-password").value;
-    const username = element<HTMLInputElement>("auth-username").value.trim();
-    if (!/^[A-Za-z0-9_]{3,30}$/.test(username)) return status("Use 3–30 letters, numbers, or underscores for your username.", true);
-    const result = await client.auth[mode]({ email, password });
+    const username = element<HTMLInputElement>("auth-username").value.trim().toLowerCase();
+    if (!usernamePattern.test(username)) return status("Use 3–30 letters, numbers, or underscores for your username.", true);
+    const result = await client.auth[mode]({ email: internalEmailFor(username), password });
     if (result.error) return status(result.error.message, true);
-    if (mode === "signUp" && !result.data.session) return status("Check your email to confirm the account, then sign in.");
+    if (mode === "signUp" && !result.data.session) return status("Account created, but email confirmation is enabled. Disable Confirm email in Supabase Authentication settings to use username-only accounts.", true);
     await refreshSession();
 }
 
