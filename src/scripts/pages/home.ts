@@ -12,11 +12,72 @@ import { compareVersions } from "../utils/version";
 
 export async function load() {
     loadBroadcasts();
+    showAssignmentGradesInInbox();
 
 
     setTimeout(() => {
         reorderSidebar();
     }, 500);
+}
+
+const assignmentGradeRequests = new Map<string, Promise<string | null>>();
+
+function gradeFromAssignmentPage(html: string) {
+    const page = new DOMParser().parseFromString(html, "text/html");
+    const scorePattern = /(?:grade|score|points?)\s*:?\s*([A-F][+-]?|\d+(?:\.\d+)?\s*(?:\/\s*\d+(?:\.\d+)?)?%?)/i;
+    const elements = page.querySelectorAll<HTMLElement>(
+        '[class*="grade" i], [class*="score" i], [data-testid*="grade" i], [data-testid*="score" i]'
+    );
+
+    for (const element of elements) {
+        const match = element.textContent?.replace(/\s+/g, " ").match(scorePattern);
+        if (match) return match[1].replace(/\s+/g, " ").trim();
+    }
+
+    const pageText = page.body.textContent?.replace(/\s+/g, " ") ?? "";
+    return pageText.match(scorePattern)?.[1].replace(/\s+/g, " ").trim() ?? null;
+}
+
+function fetchAssignmentGrade(url: string) {
+    let request = assignmentGradeRequests.get(url);
+    if (!request) {
+        request = fetch(url, { credentials: "same-origin" })
+            .then(response => (response.ok ? response.text() : null))
+            .then(html => (html ? gradeFromAssignmentPage(html) : null))
+            .catch(() => null);
+        assignmentGradeRequests.set(url, request);
+    }
+    return request;
+}
+
+function showAssignmentGradesInInbox() {
+    if (!/^\/home\/notifications/.test(location.pathname)) return;
+    let scheduled = false;
+    const addGrades = async () => {
+        scheduled = false;
+        const links = [...document.querySelectorAll<HTMLAnchorElement>('a[href^="/assignment/"]')]
+            .filter(link => !link.dataset.splusAssignmentGradeChecked)
+            .slice(0, 12);
+
+        await Promise.all(
+            links.map(async link => {
+                link.dataset.splusAssignmentGradeChecked = "true";
+                const grade = await fetchAssignmentGrade(new URL(link.href, location.origin).href);
+                if (!grade || !link.isConnected) return;
+                const badge = document.createElement("span");
+                badge.className = "splus-assignment-grade";
+                badge.textContent = `Grade: ${grade}`;
+                link.insertAdjacentElement("afterend", badge);
+            })
+        );
+    };
+    const schedule = () => {
+        if (scheduled) return;
+        scheduled = true;
+        window.setTimeout(addGrades, 150);
+    };
+    new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
+    schedule();
 }
 
 function loadBroadcasts() {

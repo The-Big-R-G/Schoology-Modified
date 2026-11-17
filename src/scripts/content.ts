@@ -72,7 +72,7 @@ async function load() {
         matchPage(
             /^\/$/, // matches /
             /^\/home$/, // matches /home
-            /^\/home\/(recent-activity|course-dashboard)$/ // matches /home/recent-activity and /home/course-dashboard
+            /^\/home\/(recent-activity|course-dashboard|notifications)$/ // matches home dashboard and notification inbox pages
         )
     ) {
         await pages.home.load();
