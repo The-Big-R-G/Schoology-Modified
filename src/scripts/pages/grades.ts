@@ -2,6 +2,7 @@ import { Logger } from "../utils/logger";
 import { Settings } from "../utils/splus-settings";
 
 const GPA_ID = "splus-gpa-summary";
+let renderScheduled = false;
 
 function gradePoints(grade: number) {
     if (grade >= 90) return 4;
@@ -57,13 +58,26 @@ function render() {
         target?.prepend(panel);
     }
     const display = Settings.GpaDisplay.value;
-    panel.innerHTML = `<strong>GPA</strong>${display !== "weighted" ? `<span>Unweighted: ${unweighted.toFixed(2)}</span>` : ""}${display !== "unweighted" ? `<span>Weighted: ${weighted.toFixed(2)}</span>` : ""}`;
+    const content = `<strong>GPA</strong>${display !== "weighted" ? `<span>Unweighted: ${unweighted.toFixed(2)}</span>` : ""}${display !== "unweighted" ? `<span>Weighted: ${weighted.toFixed(2)}</span>` : ""}`;
+    if (panel.innerHTML !== content) panel.innerHTML = content;
 }
 
 export async function load() {
     try {
-        window.setTimeout(render, 500);
-        new MutationObserver(() => render()).observe(document.body, { childList: true, subtree: true });
+        const scheduleRender = () => {
+            if (renderScheduled) return;
+            renderScheduled = true;
+            window.setTimeout(() => {
+                renderScheduled = false;
+                render();
+            }, 100);
+        };
+        scheduleRender();
+        new MutationObserver(mutations => {
+            if (mutations.some(mutation => !(mutation.target as HTMLElement).closest?.(`#${GPA_ID}`))) {
+                scheduleRender();
+            }
+        }).observe(document.body, { childList: true, subtree: true });
     } catch (error) {
         Logger.error("Unable to display GPA", error);
     }
