@@ -26,6 +26,9 @@ async function build() {
             return await verify();
         case "production":
             return await production();
+        case "chrome-dist":
+            await chrome("dist");
+            return 0;
         default:
             console.error("Invalid mode specified.");
             return 1;
