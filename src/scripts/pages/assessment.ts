@@ -113,12 +113,13 @@ export async function load() {
 
 function setupSubmissionFileDrop() {
     let attached = new WeakSet<HTMLElement>();
+    let dropTargets = new WeakMap<HTMLElement, HTMLElement>();
     let activeDropboxButton: HTMLElement | null = null;
 
     const getDropboxButton = (target: EventTarget | null) => {
-        return target instanceof Element
-            ? target.closest<HTMLElement>(".dropbox-submit")
-            : null;
+        if (!(target instanceof Element)) return null;
+        const dropZone = target.closest<HTMLElement>(".splus-assignment-drop-zone");
+        return dropZone ? dropTargets.get(dropZone) ?? null : target.closest<HTMLElement>(".dropbox-submit");
     };
 
     const insertFiles = (files: FileList) => {
@@ -231,10 +232,14 @@ function setupSubmissionFileDrop() {
                 if (dropInput.files?.length) insertFilesAfterOpening(button, dropInput.files);
             });
             const dropHint = document.createElement("span");
-            dropHint.className = "splus-drop-hint";
-            dropHint.textContent = "Drop files here";
+            dropHint.className = "splus-drop-hint splus-assignment-drop-zone";
+            dropHint.textContent = "Drag files here to submit";
+            dropTargets.set(dropHint, button);
             button.classList.add("splus-drop-enabled");
             button.append(dropHint, dropInput);
+            button.insertAdjacentElement("afterend", dropHint.cloneNode(true) as HTMLElement);
+            const visibleDropHint = button.nextElementSibling as HTMLElement;
+            dropTargets.set(visibleDropHint, button);
 
             button.addEventListener("dragover", event => {
                 event.preventDefault();
