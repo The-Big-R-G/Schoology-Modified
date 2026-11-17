@@ -145,9 +145,9 @@ function openSchoologyBrowser() {
             const url = new URL(address.value);
             if (!/^https?:$/.test(url.protocol)) throw new Error("Only web addresses are supported");
             // Most public sites (including TikTok) explicitly block iframe
-            // embedding. Open the requested page in a normal browser tab so
-            // the browser feature works without bypassing those protections.
-            chrome.runtime.sendMessage({ type: "openBrowserTab", url: url.href });
+            // embedding. Navigate this tab instead of bypassing those protections
+            // or opening another tab.
+            window.location.assign(url.href);
             overlay.close();
             return;
         } catch {
