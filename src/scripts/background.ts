@@ -163,14 +163,14 @@ function onMessage(
 ) {
     Logger.log("Received background page message", request);
 
-    if (request.type == "openBrowser" || request.type == "openBrowserTab") {
+    if (request.type == "openBrowserTab") {
         const url = typeof request.url == "string" && /^https?:\/\//i.test(request.url)
             ? request.url
             : "https://www.google.com/";
         chrome.tabs.create({ url });
         sendResponse({ success: true });
         return true;
-    } else if (request.type == "openMessages") {
+    } else if (request.type == "openMessages" || request.type == "openBrowser") {
         void (async () => {
             const tab = sender.tab ?? (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0];
             if (!tab?.id) return;
