@@ -230,8 +230,11 @@ function setupSubmissionFileDrop() {
             dropInput.addEventListener("change", () => {
                 if (dropInput.files?.length) insertFilesAfterOpening(button, dropInput.files);
             });
+            const dropHint = document.createElement("span");
+            dropHint.className = "splus-drop-hint";
+            dropHint.textContent = "Drop files here";
             button.classList.add("splus-drop-enabled");
-            button.appendChild(dropInput);
+            button.append(dropHint, dropInput);
 
             button.addEventListener("dragover", event => {
                 event.preventDefault();
