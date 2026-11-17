@@ -3,6 +3,11 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 type Message = { id: string; body: string; created_at: string; sender_id: string };
 type Configuration = { url: string; key: string };
 
+const DEFAULT_CONFIGURATION: Configuration = {
+    url: "https://sksjloysptdwsbsgpgtg.supabase.co",
+    key: "sb_publishable_RC8HNGWtcvSkMZDvYuzMiA_z35vBR-2",
+};
+
 let client: SupabaseClient | null = null;
 let selectedConversation: string | null = null;
 let activeChannel: ReturnType<SupabaseClient["channel"]> | null = null;
@@ -29,8 +34,7 @@ function createMessagingClient(configuration: Configuration) {
 
 async function loadConfiguration() {
     const data = await chrome.storage.local.get(["messagesConfiguration"]);
-    const configuration = data.messagesConfiguration as Configuration | undefined;
-    if (!configuration?.url || !configuration?.key) return;
+    const configuration = (data.messagesConfiguration as Configuration | undefined) ?? DEFAULT_CONFIGURATION;
     element<HTMLInputElement>("supabase-url").value = configuration.url;
     element<HTMLInputElement>("supabase-key").value = configuration.key;
     createMessagingClient(configuration);

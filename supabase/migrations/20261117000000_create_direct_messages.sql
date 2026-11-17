@@ -71,6 +71,7 @@ end;
 $$;
 
 revoke all on function public.create_direct_conversation(text) from public;
+revoke all on function public.create_direct_conversation(text) from anon, service_role;
 grant execute on function public.create_direct_conversation(text) to authenticated;
 grant usage on schema public to authenticated;
 grant select, insert, update on public.profiles to authenticated;
