@@ -113,6 +113,55 @@ export async function load() {
 
 function setupSubmissionFileDrop() {
     let attached = new WeakSet<HTMLElement>();
+    let activeDropboxButton: HTMLElement | null = null;
+
+    const getDropboxButton = (target: EventTarget | null) => {
+        return target instanceof Element
+            ? target.closest<HTMLElement>(".dropbox-submit")
+            : null;
+    };
+
+    document.addEventListener(
+        "dragover",
+        event => {
+            const dragEvent = event as DragEvent;
+            const button = getDropboxButton(event.target);
+            if (!button || !dragEvent.dataTransfer?.types.includes("Files")) return;
+            dragEvent.preventDefault();
+            activeDropboxButton?.classList.remove("splus-file-drop-target");
+            activeDropboxButton = button;
+            activeDropboxButton.classList.add("splus-file-drop-target");
+        },
+        true
+    );
+    document.addEventListener(
+        "drop",
+        event => {
+            const dragEvent = event as DragEvent;
+            const button = getDropboxButton(event.target) || activeDropboxButton;
+            if (!button || !dragEvent.dataTransfer?.files.length) return;
+            dragEvent.preventDefault();
+            dragEvent.stopPropagation();
+            button.classList.remove("splus-file-drop-target");
+            activeDropboxButton = null;
+            const files = dragEvent.dataTransfer.files;
+            button.click();
+            let attempts = 0;
+            const timer = window.setInterval(() => {
+                const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+                if (fileInput || ++attempts >= 20) {
+                    window.clearInterval(timer);
+                    if (!fileInput) return;
+                    const transfer = new DataTransfer();
+                    Array.from(files).forEach(file => transfer.items.add(file));
+                    fileInput.files = transfer.files;
+                    fileInput.dispatchEvent(new Event("input", { bubbles: true }));
+                    fileInput.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+            }, 100);
+        },
+        true
+    );
 
     const attach = () => {
         const buttons = Array.from(
