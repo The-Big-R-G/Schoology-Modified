@@ -158,12 +158,24 @@ function setupSubmissionFileDrop() {
     };
 
     document.addEventListener(
+        "dragenter",
+        event => {
+            const button = getDropboxButton(event.target);
+            if (!button || (event.target as HTMLElement)?.classList?.contains("splus-drop-input")) return;
+            event.preventDefault();
+            activeDropboxButton?.classList.remove("splus-file-drop-target");
+            activeDropboxButton = button;
+            activeDropboxButton.classList.add("splus-file-drop-target");
+        },
+        true
+    );
+    document.addEventListener(
         "dragover",
         event => {
             const dragEvent = event as DragEvent;
             const button = getDropboxButton(event.target);
             if ((event.target as HTMLElement)?.classList?.contains("splus-drop-input")) return;
-            if (!button || !dragEvent.dataTransfer?.types.includes("Files")) return;
+            if (!button) return;
             dragEvent.preventDefault();
             activeDropboxButton?.classList.remove("splus-file-drop-target");
             activeDropboxButton = button;
@@ -215,7 +227,6 @@ function setupSubmissionFileDrop() {
             button.appendChild(dropInput);
 
             button.addEventListener("dragover", event => {
-                if (!(event as DragEvent).dataTransfer?.types.includes("Files")) return;
                 event.preventDefault();
                 button.classList.add("splus-file-drop-target");
             });
