@@ -121,6 +121,40 @@ function setupSubmissionFileDrop() {
             : null;
     };
 
+    const insertFiles = (files: FileList) => {
+        const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+        if (!fileInput) return false;
+        const transfer = new DataTransfer();
+        Array.from(files).forEach(file => transfer.items.add(file));
+        fileInput.files = transfer.files;
+        fileInput.dispatchEvent(new Event("input", { bubbles: true }));
+        fileInput.dispatchEvent(new Event("change", { bubbles: true }));
+        return true;
+    };
+
+    const openUploadControl = () => {
+        const control = Array.from(
+            document.querySelectorAll<HTMLElement>('button, input[type="button"], a, label')
+        ).find(element => /upload|attach|add file|choose file|browse/i.test(element.textContent || (element as HTMLInputElement).value || ""));
+        control?.click();
+    };
+
+    const insertFilesAfterOpening = (button: HTMLElement, files: FileList) => {
+        button.click();
+        let attempts = 0;
+        let openedUploadControl = false;
+        const timer = window.setInterval(() => {
+            if (insertFiles(files) || ++attempts >= 30) {
+                window.clearInterval(timer);
+                return;
+            }
+            if (!openedUploadControl && attempts === 5) {
+                openedUploadControl = true;
+                openUploadControl();
+            }
+        }, 100);
+    };
+
     document.addEventListener(
         "dragover",
         event => {
@@ -144,21 +178,7 @@ function setupSubmissionFileDrop() {
             dragEvent.stopPropagation();
             button.classList.remove("splus-file-drop-target");
             activeDropboxButton = null;
-            const files = dragEvent.dataTransfer.files;
-            button.click();
-            let attempts = 0;
-            const timer = window.setInterval(() => {
-                const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
-                if (fileInput || ++attempts >= 20) {
-                    window.clearInterval(timer);
-                    if (!fileInput) return;
-                    const transfer = new DataTransfer();
-                    Array.from(files).forEach(file => transfer.items.add(file));
-                    fileInput.files = transfer.files;
-                    fileInput.dispatchEvent(new Event("input", { bubbles: true }));
-                    fileInput.dispatchEvent(new Event("change", { bubbles: true }));
-                }
-            }, 100);
+            insertFilesAfterOpening(button, dragEvent.dataTransfer.files);
         },
         true
     );
