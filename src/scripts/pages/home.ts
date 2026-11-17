@@ -13,11 +13,106 @@ import { compareVersions } from "../utils/version";
 export async function load() {
     loadBroadcasts();
     showAssignmentGradesInInbox();
+    enableUpcomingAssignmentDrops();
 
 
     setTimeout(() => {
         reorderSidebar();
     }, 500);
+}
+
+function enableUpcomingAssignmentDrops() {
+    const attachDropTargets = () => {
+        const assignments = document.querySelectorAll<HTMLElement>(
+            ".upcoming-submissions-wrapper .upcoming-event, #upcoming-events .upcoming-event"
+        );
+        for (const assignment of assignments) {
+            if (assignment.dataset.splusUploadDropReady) continue;
+            const link = assignment.querySelector<HTMLAnchorElement>('a[href^="/assignment/"]');
+            const id = link?.getAttribute("href")?.match(/^\/assignment\/(\d+)/)?.[1];
+            if (!link || !id) continue;
+            assignment.dataset.splusUploadDropReady = "true";
+            assignment.classList.add("splus-upcoming-upload-target");
+            const hint = document.createElement("span");
+            hint.className = "splus-upcoming-upload-hint";
+            hint.textContent = "Drop file to submit";
+            assignment.append(hint);
+
+            assignment.addEventListener("dragenter", event => {
+                if (!(event as DragEvent).dataTransfer?.types.includes("Files")) return;
+                event.preventDefault();
+                assignment.classList.add("splus-upcoming-upload-dragging");
+            });
+            assignment.addEventListener("dragover", event => {
+                if (!(event as DragEvent).dataTransfer?.types.includes("Files")) return;
+                event.preventDefault();
+                assignment.classList.add("splus-upcoming-upload-dragging");
+            });
+            assignment.addEventListener("dragleave", event => {
+                if (!assignment.contains(event.relatedTarget as Node | null)) {
+                    assignment.classList.remove("splus-upcoming-upload-dragging");
+                }
+            });
+            assignment.addEventListener("drop", event => {
+                const files = (event as DragEvent).dataTransfer?.files;
+                if (!files?.length) return;
+                event.preventDefault();
+                event.stopPropagation();
+                assignment.classList.remove("splus-upcoming-upload-dragging");
+                submitUpcomingAssignmentFiles(id, files, hint);
+            });
+        }
+    };
+
+    attachDropTargets();
+    new MutationObserver(attachDropTargets).observe(document.body, { childList: true, subtree: true });
+}
+
+function submitUpcomingAssignmentFiles(assignmentId: string, files: FileList, hint: HTMLElement) {
+    hint.textContent = "Opening submission…";
+    const frame = document.createElement("iframe");
+    frame.className = "splus-upcoming-upload-frame";
+    frame.src = `/assignment/${assignmentId}/dropbox/submit`;
+    document.body.append(frame);
+
+    let submitted = false;
+    const submitWhenReady = () => {
+        if (submitted) return;
+        const documentInFrame = frame.contentDocument;
+        const input = documentInFrame?.querySelector<HTMLInputElement>('input[type="file"]');
+        if (!input) return;
+        const transfer = new DataTransfer();
+        Array.from(files).forEach(file => transfer.items.add(file));
+        input.files = transfer.files;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+        const form = input.closest("form");
+        const submit = Array.from(
+            form?.querySelectorAll<HTMLElement>('button[type="submit"], input[type="submit"]') ?? []
+        ).find(button => /submit|upload|save/i.test(button.textContent || (button as HTMLInputElement).value || ""));
+        if (!submit) {
+            hint.textContent = "File attached—finish submission in the opened form.";
+            return;
+        }
+        submitted = true;
+        hint.textContent = "Submitting…";
+        window.setTimeout(() => submit.click(), 250);
+    };
+
+    frame.addEventListener("load", () => {
+        if (!submitted) return submitWhenReady();
+        window.clearInterval(retry);
+        hint.textContent = "Submitted";
+        window.setTimeout(() => frame.remove(), 500);
+    });
+    const retry = window.setInterval(submitWhenReady, 150);
+    window.setTimeout(() => {
+        window.clearInterval(retry);
+        if (!submitted) {
+            hint.textContent = "Could not find Schoology’s upload form.";
+            frame.remove();
+        }
+    }, 10000);
 }
 
 const assignmentGradeRequests = new Map<string, Promise<string | null>>();

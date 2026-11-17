@@ -1664,3 +1664,31 @@ Should not be shown
     font-weight: 600;
     line-height: 18px;
 }
+
+.splus-upcoming-upload-target {
+    position: relative;
+    transition: outline-color 120ms ease, background-color 120ms ease;
+}
+
+.splus-upcoming-upload-hint {
+    display: block;
+    margin-top: 4px;
+    color: #2d6cdf;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.splus-upcoming-upload-dragging {
+    outline: 3px dashed #2d6cdf;
+    outline-offset: 3px;
+    background: #e8f0ff !important;
+}
+
+.splus-upcoming-upload-frame {
+    position: fixed;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    border: 0;
+}
