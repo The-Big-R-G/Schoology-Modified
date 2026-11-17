@@ -51,8 +51,9 @@ function makeMessagesPanelDraggable(panel: HTMLElement, titlebar: HTMLElement) {
 }
 
 function openMessagesInSchoology() {
-    document.getElementById("splus-messages-overlay")?.remove();
-    const overlay = document.createElement("div");
+    const existing = document.getElementById("splus-messages-overlay") as HTMLDialogElement | null;
+    if (existing) existing.close();
+    const overlay = document.createElement("dialog");
     overlay.id = "splus-messages-overlay";
     overlay.setAttribute("role", "dialog");
     overlay.setAttribute("aria-modal", "true");
@@ -78,7 +79,7 @@ function openMessagesInSchoology() {
     close.textContent = "×";
     close.title = "Close Messages";
     close.setAttribute("aria-label", "Close Messages");
-    close.addEventListener("click", () => overlay.remove());
+    close.addEventListener("click", () => overlay.close());
     minimize.addEventListener("click", () => {
         const minimized = panel.classList.toggle("splus-messages-minimized");
         minimize.textContent = minimized ? "□" : "−";
@@ -94,9 +95,11 @@ function openMessagesInSchoology() {
     panel.append(titlebar, frame);
     overlay.append(panel);
     overlay.addEventListener("click", event => {
-        if (event.target === overlay) overlay.remove();
+        if (event.target === overlay) overlay.close();
     });
+    overlay.addEventListener("close", () => overlay.remove());
     document.body.append(overlay);
+    overlay.showModal();
     const width = Math.min(880, Math.max(320, window.innerWidth - 48));
     const height = Math.min(680, Math.max(240, window.innerHeight - 48));
     panel.style.width = `${width}px`;
@@ -114,7 +117,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 });
 
 document.addEventListener("keydown", event => {
-    if (event.key === "Escape") document.getElementById("splus-messages-overlay")?.remove();
+    if (event.key === "Escape") (document.getElementById("splus-messages-overlay") as HTMLDialogElement | null)?.close();
 });
 
 async function load() {
