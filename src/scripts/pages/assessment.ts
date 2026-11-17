@@ -160,7 +160,9 @@ function setupSubmissionFileDrop() {
     document.addEventListener(
         "dragenter",
         event => {
-            const button = getDropboxButton(event.target);
+            const button =
+                getDropboxButton(event.target) ||
+                document.querySelector<HTMLElement>(".dropbox-submit");
             if (!button || (event.target as HTMLElement)?.classList?.contains("splus-drop-input")) return;
             event.preventDefault();
             activeDropboxButton?.classList.remove("splus-file-drop-target");
@@ -173,7 +175,9 @@ function setupSubmissionFileDrop() {
         "dragover",
         event => {
             const dragEvent = event as DragEvent;
-            const button = getDropboxButton(event.target);
+            const button =
+                getDropboxButton(event.target) ||
+                document.querySelector<HTMLElement>(".dropbox-submit");
             if ((event.target as HTMLElement)?.classList?.contains("splus-drop-input")) return;
             if (!button) return;
             dragEvent.preventDefault();
@@ -188,7 +192,10 @@ function setupSubmissionFileDrop() {
         event => {
             const dragEvent = event as DragEvent;
             if ((event.target as HTMLElement)?.classList?.contains("splus-drop-input")) return;
-            const button = getDropboxButton(event.target) || activeDropboxButton;
+            const button =
+                getDropboxButton(event.target) ||
+                activeDropboxButton ||
+                document.querySelector<HTMLElement>(".dropbox-submit");
             if (!button || !dragEvent.dataTransfer?.files.length) return;
             dragEvent.preventDefault();
             dragEvent.stopPropagation();
