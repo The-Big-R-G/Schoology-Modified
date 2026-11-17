@@ -90,7 +90,7 @@ async function load() {
 
     if (
         matchPage(
-            /^\/assignment\/\d+\/assessment$/ // matches /assignment/1234/assessment
+            /^\/assignment\/\d+(?:\/assessment)?$/ // matches assignment submission pages
         )
     ) {
         await pages.assessment.load();

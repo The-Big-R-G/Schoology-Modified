@@ -2,6 +2,7 @@ import { createElement, getBrowser } from "../utils/dom";
 
 // modifications to Confirm Submission assessment popup
 export async function load() {
+    setupSubmissionFileDrop();
     /**
      * The array of handlers to call on a newly-added Confirm Submission popup.
      * @type Array<function(Element):void>
@@ -108,4 +109,48 @@ export async function load() {
         childList: true,
         subtree: false,
     });
+}
+
+function setupSubmissionFileDrop() {
+    let attached = new WeakSet<HTMLElement>();
+
+    const attach = () => {
+        const buttons = Array.from(
+            document.querySelectorAll<HTMLElement>(
+                'button, input[type="submit"], input[type="button"], a'
+            )
+        ).filter(button => /submit assignment|submit/i.test(button.textContent || (button as HTMLInputElement).value || ""));
+
+        for (const button of buttons) {
+            if (attached.has(button)) continue;
+            const form = button.closest("form") || document;
+            const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
+            if (!fileInput) continue;
+            attached.add(button);
+
+            button.addEventListener("dragover", event => {
+                if (!(event as DragEvent).dataTransfer?.types.includes("Files")) return;
+                event.preventDefault();
+                button.classList.add("splus-file-drop-target");
+            });
+            button.addEventListener("dragleave", () => {
+                button.classList.remove("splus-file-drop-target");
+            });
+            button.addEventListener("drop", event => {
+                event.preventDefault();
+                button.classList.remove("splus-file-drop-target");
+                const files = (event as DragEvent).dataTransfer?.files;
+                if (!files?.length) return;
+
+                const transfer = new DataTransfer();
+                Array.from(files).forEach(file => transfer.items.add(file));
+                fileInput.files = transfer.files;
+                fileInput.dispatchEvent(new Event("input", { bubbles: true }));
+                fileInput.dispatchEvent(new Event("change", { bubbles: true }));
+            });
+        }
+    };
+
+    attach();
+    new MutationObserver(attach).observe(document.body, { childList: true, subtree: true });
 }

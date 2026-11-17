@@ -36,6 +36,11 @@
 #splus-gpa-setting h2 { margin-top: 0; }
 #splus-gpa-setting select { display: block; margin-top: 8px; }
 
+.splus-file-drop-target {
+    outline: 3px dashed var(--primary-color) !important;
+    outline-offset: 4px;
+}
+
 /* Navbar items */
 
 ._1SIMq {
