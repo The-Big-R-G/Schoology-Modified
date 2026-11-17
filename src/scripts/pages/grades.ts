@@ -5,18 +5,30 @@ const GPA_ID = "splus-gpa-summary";
 let renderScheduled = false;
 
 function gradePoints(grade: number) {
-    if (grade >= 90) return 4;
-    if (grade >= 80) return 3;
-    if (grade >= 70) return 2;
-    if (grade >= 60) return 1;
+    if (grade >= 98) return 4.3;
+    if (grade >= 93) return 4;
+    if (grade >= 90) return 3.7;
+    if (grade >= 88) return 3.3;
+    if (grade >= 85) return 3;
+    if (grade >= 82) return 2.7;
+    if (grade >= 80) return 2.3;
+    if (grade >= 77) return 2;
+    if (grade >= 74) return 1.7;
+    if (grade >= 72) return 1.3;
+    if (grade >= 70) return 1;
     return 0;
 }
 
 function parseGrade(text: string) {
     const percent = text.match(/(\d+(?:\.\d+)?)\s*%/);
     if (percent) return Number(percent[1]);
-    const letter = text.trim().toUpperCase().charAt(0);
-    return { A: 95, B: 85, C: 75, D: 65, F: 0 }[letter as "A" | "B" | "C" | "D" | "F"] ?? null;
+    const letter = text.trim().toUpperCase().match(/^(A\+|A-|A|B\+|B-|B|C\+|C-|C|D\+|D|F)(?=\s|$|\()/)?.[1];
+    return {
+        "A+": 98, A: 93, "A-": 90,
+        "B+": 88, B: 85, "B-": 82,
+        "C+": 80, C: 77, "C-": 74,
+        "D+": 72, D: 70, F: 0,
+    }[letter as "A+" | "A" | "A-" | "B+" | "B" | "B-" | "C+" | "C" | "C-" | "D+" | "D" | "F"] ?? null;
 }
 
 function isWeightedCourse(title: string) {
