@@ -26,6 +26,46 @@ function ready() {
     });
 }
 
+function openMessagesInSchoology() {
+    document.getElementById("splus-messages-overlay")?.remove();
+    const overlay = document.createElement("div");
+    overlay.id = "splus-messages-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Schoology Plus Messages");
+
+    const panel = document.createElement("div");
+    panel.className = "splus-messages-panel";
+    const close = document.createElement("button");
+    close.className = "splus-messages-close";
+    close.type = "button";
+    close.textContent = "×";
+    close.title = "Close Messages";
+    close.setAttribute("aria-label", "Close Messages");
+    close.addEventListener("click", () => overlay.remove());
+    const frame = document.createElement("iframe");
+    frame.className = "splus-messages-frame";
+    frame.src = chrome.runtime.getURL("messages.html");
+    frame.title = "Schoology Plus Messages";
+    panel.append(close, frame);
+    overlay.append(panel);
+    overlay.addEventListener("click", event => {
+        if (event.target === overlay) overlay.remove();
+    });
+    document.body.append(overlay);
+    close.focus();
+}
+
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+    if (request.type !== "openMessagesInSchoology") return;
+    openMessagesInSchoology();
+    sendResponse({ success: true });
+});
+
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape") document.getElementById("splus-messages-overlay")?.remove();
+});
+
 async function load() {
     Logger.debug(`Current value of SchoologyPlus variable:`, globalThis.SchoologyPlus);
 

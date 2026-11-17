@@ -107,7 +107,8 @@
       "resources": [
         "imgs/*",
         "theme-editor.html",
-        "default-icons.html"
+        "default-icons.html",
+        "messages.html"
       ],
       "matches": [
         "<all_urls>"

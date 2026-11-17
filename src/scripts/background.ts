@@ -164,7 +164,11 @@ function onMessage(
     Logger.log("Received background page message", request);
 
     if (request.type == "openMessages") {
-        chrome.tabs.create({ url: chrome.runtime.getURL("messages.html") });
+        void (async () => {
+            const tab = sender.tab ?? (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0];
+            if (!tab?.id) return;
+            chrome.tabs.sendMessage(tab.id, { type: "openMessagesInSchoology" });
+        })();
         sendResponse({ success: true });
         return true;
     } else if (request.type == "fetch" && request.url !== undefined) {
