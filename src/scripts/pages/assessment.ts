@@ -117,15 +117,17 @@ function setupSubmissionFileDrop() {
     const attach = () => {
         const buttons = Array.from(
             document.querySelectorAll<HTMLElement>(
-                'button, input[type="submit"], input[type="button"], a'
+                'button, input[type="submit"], input[type="button"], a.dropbox-submit'
             )
-        ).filter(button => /submit assignment|submit/i.test(button.textContent || (button as HTMLInputElement).value || ""));
+        ).filter(button =>
+            button.matches(".dropbox-submit") ||
+            /submit assignment|submit/i.test(
+                button.textContent || (button as HTMLInputElement).value || ""
+            )
+        );
 
         for (const button of buttons) {
             if (attached.has(button)) continue;
-            const form = button.closest("form") || document;
-            const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
-            if (!fileInput) continue;
             attached.add(button);
 
             button.addEventListener("dragover", event => {
@@ -142,11 +144,25 @@ function setupSubmissionFileDrop() {
                 const files = (event as DragEvent).dataTransfer?.files;
                 if (!files?.length) return;
 
-                const transfer = new DataTransfer();
-                Array.from(files).forEach(file => transfer.items.add(file));
-                fileInput.files = transfer.files;
-                fileInput.dispatchEvent(new Event("input", { bubbles: true }));
-                fileInput.dispatchEvent(new Event("change", { bubbles: true }));
+                const applyFiles = () => {
+                    const fileInput =
+                        button.closest("form")?.querySelector<HTMLInputElement>('input[type="file"]') ||
+                        document.querySelector<HTMLInputElement>('input[type="file"]');
+                    if (!fileInput) return false;
+                    const transfer = new DataTransfer();
+                    Array.from(files).forEach(file => transfer.items.add(file));
+                    fileInput.files = transfer.files;
+                    fileInput.dispatchEvent(new Event("input", { bubbles: true }));
+                    fileInput.dispatchEvent(new Event("change", { bubbles: true }));
+                    return true;
+                };
+
+                if (applyFiles() || !button.matches(".dropbox-submit")) return;
+                button.click();
+                let attempts = 0;
+                const waitForUploadInput = window.setInterval(() => {
+                    if (applyFiles() || ++attempts >= 20) window.clearInterval(waitForUploadInput);
+                }, 100);
             });
         }
     };
