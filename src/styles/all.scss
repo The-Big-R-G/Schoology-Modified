@@ -105,6 +105,81 @@
 
 .splus-messages-minimized .splus-messages-frame { display: none; }
 
+.splus-update-banner {
+    position: fixed;
+    z-index: 2147483646;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 16px;
+    background: #b42318;
+    color: #fff;
+    text-align: center;
+    font-size: 13px;
+}
+
+.splus-update-banner a { color: #fff; font-weight: 700; }
+
+.splus-web-browser-overlay {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+}
+
+.splus-web-browser-overlay::backdrop { background: rgba(17, 24, 39, 0.55); }
+
+.splus-web-browser-panel {
+    position: fixed;
+    top: 8vh;
+    left: 8vw;
+    width: 84vw;
+    height: 84vh;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+}
+
+.splus-web-browser-toolbar {
+    display: flex;
+    gap: 6px;
+    height: 46px;
+    box-sizing: border-box;
+    padding: 7px;
+    background: #26334d;
+}
+
+.splus-web-browser-toolbar input {
+    min-width: 0;
+    flex: 1;
+    padding: 6px 9px;
+    border: 0;
+    border-radius: 4px;
+}
+
+.splus-web-browser-toolbar button {
+    min-width: 42px;
+    border: 0;
+    border-radius: 4px;
+    background: #fff;
+    color: #26334d;
+    cursor: pointer;
+}
+
+.splus-web-browser-frame {
+    display: block;
+    width: 100%;
+    height: calc(100% - 46px);
+    border: 0;
+}
+
 #splus-gpa-setting h2 { margin-top: 0; }
 #splus-gpa-setting select { display: block; margin-top: 8px; }
 
