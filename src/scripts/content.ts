@@ -60,7 +60,12 @@ async function load() {
     );
 
     if (isGradesPage) {
+        await pages.grades.load();
         await pages.course.load();
+    }
+
+    if (matchPage(/^\/settings\/account$/)) {
+        await pages.accountSettings.load();
     }
 
     if (

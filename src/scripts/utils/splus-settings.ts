@@ -420,6 +420,24 @@ export const Settings = {
             },
         }
     ),
+    GpaDisplay: new SPlusSetting<"both" | "weighted" | "unweighted" | "disabled">(
+        "gpaDisplay",
+        "GPA Display",
+        "Shows weighted and/or unweighted GPA on the Grades page. Weighted courses are identified by course titles containing AP, IB, Honors, Advanced, or Accelerated.",
+        "both",
+        "select",
+        "sync",
+        {
+            config: {
+                options: [
+                    { text: "Weighted and unweighted", value: "both" },
+                    { text: "Weighted only", value: "weighted" },
+                    { text: "Unweighted only", value: "unweighted" },
+                    { text: "Hide GPA", value: "disabled" },
+                ],
+            },
+        }
+    ),
     DesktopNotifications: new SPlusSetting<"enabled" | "badge" | "popup" | "disabled">(
         "notifications",
         "Desktop Notifications",

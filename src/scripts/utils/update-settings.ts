@@ -85,6 +85,7 @@ export async function updateSettings() {
                 Settings.CustomGradingScales.settingsMenuElement,
                 Settings.CourseOrderMethod.settingsMenuElement,
                 Settings.WeightedGradebookIndicator.settingsMenuElement,
+                Settings.GpaDisplay.settingsMenuElement,
             ]),
             createElement("div", [], { id: "splus-settings-section-utilities" }, [
                 Settings.DesktopNotifications.settingsMenuElement,
