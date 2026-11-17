@@ -26,6 +26,30 @@ function ready() {
     });
 }
 
+function makeMessagesPanelDraggable(panel: HTMLElement, titlebar: HTMLElement) {
+    let drag: { pointerId: number; offsetX: number; offsetY: number } | null = null;
+    titlebar.addEventListener("pointerdown", event => {
+        if ((event.target as HTMLElement).closest("button")) return;
+        const bounds = panel.getBoundingClientRect();
+        drag = { pointerId: event.pointerId, offsetX: event.clientX - bounds.left, offsetY: event.clientY - bounds.top };
+        titlebar.setPointerCapture(event.pointerId);
+        event.preventDefault();
+    });
+    titlebar.addEventListener("pointermove", event => {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        const bounds = panel.getBoundingClientRect();
+        const left = Math.max(0, Math.min(window.innerWidth - bounds.width, event.clientX - drag.offsetX));
+        const top = Math.max(0, Math.min(window.innerHeight - bounds.height, event.clientY - drag.offsetY));
+        panel.style.left = `${left}px`;
+        panel.style.top = `${top}px`;
+    });
+    titlebar.addEventListener("pointerup", event => {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        titlebar.releasePointerCapture(event.pointerId);
+        drag = null;
+    });
+}
+
 function openMessagesInSchoology() {
     document.getElementById("splus-messages-overlay")?.remove();
     const overlay = document.createElement("div");
@@ -36,23 +60,50 @@ function openMessagesInSchoology() {
 
     const panel = document.createElement("div");
     panel.className = "splus-messages-panel";
+    const titlebar = document.createElement("div");
+    titlebar.className = "splus-messages-titlebar";
+    const title = document.createElement("strong");
+    title.textContent = "Messages";
+    const controls = document.createElement("div");
+    controls.className = "splus-messages-controls";
+    const minimize = document.createElement("button");
+    minimize.className = "splus-messages-control";
+    minimize.type = "button";
+    minimize.textContent = "−";
+    minimize.title = "Minimize Messages";
+    minimize.setAttribute("aria-label", "Minimize Messages");
     const close = document.createElement("button");
-    close.className = "splus-messages-close";
+    close.className = "splus-messages-control";
     close.type = "button";
     close.textContent = "×";
     close.title = "Close Messages";
     close.setAttribute("aria-label", "Close Messages");
     close.addEventListener("click", () => overlay.remove());
+    minimize.addEventListener("click", () => {
+        const minimized = panel.classList.toggle("splus-messages-minimized");
+        minimize.textContent = minimized ? "□" : "−";
+        minimize.title = minimized ? "Restore Messages" : "Minimize Messages";
+        minimize.setAttribute("aria-label", minimize.title);
+    });
+    controls.append(minimize, close);
+    titlebar.append(title, controls);
     const frame = document.createElement("iframe");
     frame.className = "splus-messages-frame";
     frame.src = chrome.runtime.getURL("messages.html");
     frame.title = "Schoology Plus Messages";
-    panel.append(close, frame);
+    panel.append(titlebar, frame);
     overlay.append(panel);
     overlay.addEventListener("click", event => {
         if (event.target === overlay) overlay.remove();
     });
     document.body.append(overlay);
+    const width = Math.min(880, Math.max(320, window.innerWidth - 48));
+    const height = Math.min(680, Math.max(240, window.innerHeight - 48));
+    panel.style.width = `${width}px`;
+    panel.style.height = `${height}px`;
+    panel.style.left = `${Math.max(0, (window.innerWidth - width) / 2)}px`;
+    panel.style.top = `${Math.max(0, (window.innerHeight - height) / 2)}px`;
+    makeMessagesPanelDraggable(panel, titlebar);
     close.focus();
 }
 
