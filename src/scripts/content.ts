@@ -123,11 +123,15 @@ function openSchoologyBrowser() {
     toolbar.className = "splus-web-browser-toolbar";
     const address = document.createElement("input");
     address.type = "url";
-    address.value = "https://www.google.com";
+    address.value = "https://www.google.com/webhp?igu=1";
     address.setAttribute("aria-label", "Web address");
     const go = document.createElement("button");
     go.type = "submit";
     go.textContent = "Go";
+    const openTab = document.createElement("button");
+    openTab.type = "button";
+    openTab.textContent = "Open tab";
+    openTab.title = "Open this address in a browser tab";
     const close = document.createElement("button");
     close.type = "button";
     close.textContent = "×";
@@ -153,11 +157,14 @@ function openSchoologyBrowser() {
         navigate();
     });
     close.addEventListener("click", () => overlay.close());
+    openTab.addEventListener("click", () => {
+        chrome.runtime.sendMessage({ type: "openBrowserTab", url: frame.src || address.value });
+    });
     overlay.addEventListener("click", event => {
         if (event.target === overlay) overlay.close();
     });
     overlay.addEventListener("close", () => overlay.remove());
-    toolbar.append(address, go, close);
+    toolbar.append(address, go, openTab, close);
     panel.append(toolbar, frame);
     overlay.append(panel);
     document.body.append(overlay);
