@@ -2,6 +2,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 type Message = { id: string; body: string; created_at: string; sender_id: string };
 type Profile = { id: string; username: string };
+type Membership = { conversation_id: string; user_id: string };
 type Configuration = { url: string; key: string };
 
 const DEFAULT_CONFIGURATION: Configuration = {
@@ -11,7 +12,9 @@ const DEFAULT_CONFIGURATION: Configuration = {
 
 let client: SupabaseClient | null = null;
 let selectedConversation: string | null = null;
+let currentUserId: string | null = null;
 let activeChannel: ReturnType<SupabaseClient["channel"]> | null = null;
+const conversationLabels = new Map<string, string>();
 
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const status = (message: string, error = false) => {
@@ -56,7 +59,11 @@ function show(section: "configuration" | "authentication" | "inbox") {
 async function refreshSession() {
     if (!client) return show("configuration");
     const { data, error } = await client.auth.getUser();
-    if (error || !data.user) return show("authentication");
+    if (error || !data.user) {
+        currentUserId = null;
+        return show("authentication");
+    }
+    currentUserId = data.user.id;
     show("inbox");
     const username = element<HTMLInputElement>("auth-username").value.trim().toLowerCase() || usernameFromInternalEmail(data.user.email);
     if (usernamePattern.test(username)) {
@@ -66,15 +73,26 @@ async function refreshSession() {
 }
 
 async function loadConversations() {
-    if (!client) return;
-    const { data, error } = await client.from("conversation_members").select("conversation_id");
+    if (!client || !currentUserId) return;
+    const { data, error } = await client.from("conversation_members").select("conversation_id, user_id");
     if (error) return status(error.message, true);
+    const memberships = (data ?? []) as Membership[];
+    const partnerIds = [...new Set(memberships.filter(membership => membership.user_id !== currentUserId).map(membership => membership.user_id))];
+    const { data: profiles } = partnerIds.length
+        ? await client.from("profiles").select("id, username").in("id", partnerIds)
+        : { data: [] as Profile[] };
+    const usernames = new Map((profiles ?? []).map((profile: Profile) => [profile.id, profile.username]));
+    conversationLabels.clear();
+    for (const membership of memberships) {
+        if (membership.user_id === currentUserId) continue;
+        conversationLabels.set(membership.conversation_id, `@${usernames.get(membership.user_id) ?? "unknown"}`);
+    }
     const list = element<HTMLUListElement>("conversation-list");
     list.replaceChildren();
-    for (const membership of data ?? []) {
+    for (const conversationId of [...new Set(memberships.map(membership => membership.conversation_id))]) {
         const button = document.createElement("button");
-        button.textContent = `Conversation ${membership.conversation_id.slice(0, 8)}`;
-        button.addEventListener("click", () => openConversation(membership.conversation_id));
+        button.textContent = conversationLabels.get(conversationId) ?? "@unknown";
+        button.addEventListener("click", () => openConversation(conversationId));
         const item = document.createElement("li");
         item.append(button);
         list.append(item);
@@ -84,7 +102,7 @@ async function loadConversations() {
 async function openConversation(id: string) {
     if (!client) return;
     selectedConversation = id;
-    element<HTMLElement>("conversation-title").textContent = `Conversation ${id.slice(0, 8)}`;
+    element<HTMLElement>("conversation-title").textContent = conversationLabels.get(id) ?? "@unknown";
     element<HTMLFormElement>("message-form").hidden = false;
     await loadMessages();
     if (activeChannel) await client.removeChannel(activeChannel);
@@ -150,7 +168,7 @@ async function authenticate(mode: "signInWithPassword" | "signUp") {
 element<HTMLButtonElement>("save-configuration").addEventListener("click", saveConfiguration);
 element<HTMLButtonElement>("sign-in").addEventListener("click", () => authenticate("signInWithPassword"));
 element<HTMLButtonElement>("sign-up").addEventListener("click", () => authenticate("signUp"));
-element<HTMLButtonElement>("sign-out").addEventListener("click", async () => { await client?.auth.signOut(); selectedConversation = null; show("authentication"); });
+element<HTMLButtonElement>("sign-out").addEventListener("click", async () => { await client?.auth.signOut(); selectedConversation = null; currentUserId = null; conversationLabels.clear(); show("authentication"); });
 element<HTMLFormElement>("new-conversation").addEventListener("submit", async event => {
     event.preventDefault();
     if (!client) return;
