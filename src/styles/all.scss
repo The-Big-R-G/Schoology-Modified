@@ -117,9 +117,10 @@
     color: #fff;
     text-align: center;
     font-size: 13px;
+    pointer-events: none;
 }
 
-.splus-update-banner a { color: #fff; font-weight: 700; }
+.splus-update-banner a { color: #fff; font-weight: 700; pointer-events: auto; }
 
 .splus-web-browser-overlay {
     width: 100vw;
