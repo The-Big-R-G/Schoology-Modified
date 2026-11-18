@@ -166,7 +166,7 @@ function addVersionToProfileMenu() {
 
         const menu = settingsLink.closest<HTMLElement>('[role="menu"], ul');
         if (!menu) return;
-        const profileLink = menu.querySelector<HTMLElement>('a[href^="/user/"], [class*="profile"]');
+        const profileLink = menu.querySelector<HTMLElement>('a[href^="/user/"]');
         const existingVersion = menu?.querySelector<HTMLElement>(".splus-profile-version");
         const version = existingVersion ?? createElement("div", ["splus-profile-version"]);
         version.textContent = `Schoology Plus v${chrome.runtime.getManifest().version}`;
@@ -177,8 +177,10 @@ function addVersionToProfileMenu() {
         );
     };
 
-    addVersion();
-    new MutationObserver(addVersion).observe(document.body, { childList: true, subtree: true });
+    const profileButton = document.querySelector<HTMLButtonElement>(
+        'button[data-sgy-sitenav="nav-trigger"]'
+    );
+    profileButton?.addEventListener("click", () => window.setTimeout(addVersion, 0));
 }
 
 async function checkForGithubUpdate() {
