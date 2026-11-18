@@ -132,7 +132,7 @@ function setupSubmissionFileDrop() {
         fileInput.files = transfer.files;
         fileInput.dispatchEvent(new Event("input", { bubbles: true }));
         fileInput.dispatchEvent(new Event("change", { bubbles: true }));
-        return true;
+        return fileInput.files?.length === files.length;
     };
 
     const openUploadControl = () => {
@@ -147,7 +147,19 @@ function setupSubmissionFileDrop() {
         let attempts = 0;
         let openedUploadControl = false;
         const timer = window.setInterval(() => {
-            if (insertFiles(files) || ++attempts >= 30) {
+            if (insertFiles(files)) {
+                window.clearInterval(timer);
+                window.setTimeout(() => {
+                    const submit = Array.from(document.querySelectorAll<HTMLElement>(
+                        'button[type="submit"], input[type="submit"], #edit-submit'
+                    )).find(control => /submit|upload|save/i.test(
+                        control.textContent || (control as HTMLInputElement).value || ""
+                    ));
+                    submit?.click();
+                }, 500);
+                return;
+            }
+            if (++attempts >= 30) {
                 window.clearInterval(timer);
                 return;
             }
@@ -264,14 +276,25 @@ function setupSubmissionFileDrop() {
                     fileInput.files = transfer.files;
                     fileInput.dispatchEvent(new Event("input", { bubbles: true }));
                     fileInput.dispatchEvent(new Event("change", { bubbles: true }));
-                    return true;
+                    return fileInput.files?.length === files.length;
                 };
 
                 if (applyFiles() || !button.matches(".dropbox-submit")) return;
                 button.click();
                 let attempts = 0;
                 const waitForUploadInput = window.setInterval(() => {
-                    if (applyFiles() || ++attempts >= 20) window.clearInterval(waitForUploadInput);
+                    if (applyFiles()) {
+                        window.clearInterval(waitForUploadInput);
+                        window.setTimeout(() => {
+                            const form = button.closest("form") || document;
+                            const submit = Array.from(form.querySelectorAll<HTMLElement>(
+                                'button[type="submit"], input[type="submit"], #edit-submit'
+                            )).find(control => /submit|upload|save/i.test(
+                                control.textContent || (control as HTMLInputElement).value || ""
+                            ));
+                            submit?.click();
+                        }, 500);
+                    } else if (++attempts >= 20) window.clearInterval(waitForUploadInput);
                 }, 100);
             });
         }
