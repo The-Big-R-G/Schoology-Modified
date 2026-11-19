@@ -141,28 +141,24 @@ export async function preload() {
 
 function addVersionToProfileMenu() {
     const addVersion = () => {
-        const settingsLink = document.querySelector<HTMLAnchorElement>(
-            'a[href="/settings/account"]'
+        const profileButton = document.querySelector<HTMLButtonElement>(
+            'button[data-sgy-sitenav="nav-trigger"]'
         );
-        if (!settingsLink) return;
-
-        const menu = settingsLink.closest<HTMLElement>('[role="menu"], ul');
-        if (!menu) return;
-        const profileLink = menu.querySelector<HTMLElement>('a[href^="/user/"]');
-        const existingVersion = menu?.querySelector<HTMLElement>(".splus-profile-version");
-        const version = existingVersion ?? createElement("div", ["splus-profile-version"]);
-        version.textContent = `Schoology Plus v${chrome.runtime.getManifest().version}`;
-        if (existingVersion) return;
-        (profileLink?.parentElement || settingsLink.parentElement)?.insertAdjacentElement(
-            profileLink ? "afterend" : "beforebegin",
-            version
-        );
+        const profileName = [...(profileButton?.querySelectorAll<HTMLElement>(".LGaPf") ?? [])]
+            .find(element => !element.querySelector("svg") && element.textContent?.trim());
+        if (!profileName) return;
+        const version = profileName.querySelector<HTMLElement>(".splus-profile-inline-version")
+            ?? createElement("span", ["splus-profile-inline-version"]);
+        version.textContent = `v${chrome.runtime.getManifest().version}`;
+        if (!version.parentElement) profileName.append(version);
     };
 
-    const profileButton = document.querySelector<HTMLButtonElement>(
-        'button[data-sgy-sitenav="nav-trigger"]'
-    );
-    profileButton?.addEventListener("click", () => window.setTimeout(addVersion, 0));
+    addVersion();
+    document.addEventListener("click", event => {
+        if ((event.target as Element | null)?.closest('button[data-sgy-sitenav="nav-trigger"]')) {
+            window.setTimeout(addVersion, 0);
+        }
+    });
 }
 
 async function checkForGithubUpdate() {
