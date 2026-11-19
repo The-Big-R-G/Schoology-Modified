@@ -76,8 +76,6 @@ export async function load() {
     preventScrollingWhenModalOpen();
     displayAssessmentDarkThemeWarningMessage();
     addVersionToProfileMenu();
-    void checkForGithubUpdate();
-    window.setTimeout(() => void checkForGithubUpdate(), 2000);
     createSettingsHashListener();
 }
 
