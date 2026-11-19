@@ -173,6 +173,13 @@ function onMessage(
         })();
         sendResponse({ success: true });
         return true;
+    } else if (request.type == "downloadUpdate") {
+        chrome.downloads.download({
+            url: "https://github.com/The-Big-R-G/Schoology-Modified/archive/refs/heads/main.zip",
+            filename: "Schoology-Modified-update.zip",
+            saveAs: true,
+        }, downloadId => sendResponse({ success: downloadId !== undefined }));
+        return true;
     } else if (request.type == "getGithubVersion") {
         fetch("https://raw.githubusercontent.com/The-Big-R-G/Schoology-Modified/main/VERSION.txt", {
             cache: "no-store",

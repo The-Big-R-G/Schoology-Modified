@@ -198,6 +198,15 @@ async function checkForGithubUpdate() {
         }, [
             createElement("strong", [], { textContent: "OUT OF VERSION" }),
             createElement("span", [], { textContent: ` Installed v${localVersion}; GitHub v${remoteVersion}.` }),
+            createElement("button", ["splus-update-download"], {
+                type: "button",
+                textContent: " DOWNLOAD UPDATE",
+                onclick: () => {
+                    chrome.runtime.sendMessage({ type: "downloadUpdate" }, result => {
+                        if (result?.success) banner.querySelector("span")!.textContent = " Update download started. Load the ZIP from Brave’s extensions page.";
+                    });
+                },
+            }),
             createElement("a", [], {
                 href: "https://github.com/The-Big-R-G/Schoology-Modified",
                 target: "_blank",

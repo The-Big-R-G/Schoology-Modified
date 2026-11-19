@@ -80,6 +80,7 @@
     "activeTab",
     "scripting",
     "offscreen",
+    "downloads",
     "declarativeNetRequestWithHostAccess"
   ],
   "optional_permissions": [],

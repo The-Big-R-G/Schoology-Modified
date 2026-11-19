@@ -124,6 +124,17 @@
 }
 
 .splus-update-banner a { color: #fff; font-weight: 700; pointer-events: auto; }
+.splus-update-download {
+    margin-left: 10px;
+    padding: 4px 8px;
+    border: 1px solid #fff;
+    border-radius: 3px;
+    background: #fff;
+    color: #b42318;
+    font-weight: 800;
+    pointer-events: auto;
+    cursor: pointer;
+}
 
 @keyframes splus-version-flash {
     50% { background: #ff1c1c; color: #fff; }
