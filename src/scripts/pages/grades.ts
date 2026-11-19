@@ -57,7 +57,7 @@ function render() {
 
     const unweighted = values.reduce((sum, course) => sum + gradePoints(course.grade), 0) / values.length;
     const weighted = values.reduce(
-        (sum, course) => sum + Math.min(5, gradePoints(course.grade) + (course.weighted ? 1 : 0)),
+        (sum, course) => sum + Math.min(5.3, gradePoints(course.grade) + (course.weighted ? 1 : 0)),
         0
     ) / values.length;
 
