@@ -174,23 +174,15 @@ function addVersionToProfileMenu() {
 }
 
 async function checkForGithubUpdate() {
-    const updateUrl = "https://raw.githubusercontent.com/The-Big-R-G/Schoology-Modified/main/VERSION.txt";
     try {
-        const response = await new Promise<Record<string, any> | null>(resolve => {
-            chrome.runtime.sendMessage(
-                { type: "fetch", url: `${updateUrl}?t=${Date.now()}`, bodyReadType: "text" },
-                result => {
-                    if (chrome.runtime.lastError || !result) return resolve(null);
-                    try {
-                        resolve(typeof result === "string" ? JSON.parse(result) : result);
-                    } catch {
-                        resolve(null);
-                    }
-                }
-            );
+        const response = await new Promise<{ success?: boolean; version?: string } | null>(resolve => {
+            chrome.runtime.sendMessage({ type: "getGithubVersion" }, result => {
+                if (chrome.runtime.lastError || !result) return resolve(null);
+                resolve(result);
+            });
         });
-        if (!response?.success || !response.ok) return;
-        const remoteVersion = String(response.text ?? "").trim();
+        if (!response?.success) return;
+        const remoteVersion = String(response.version ?? "").trim();
         const localVersion = chrome.runtime.getManifest().version;
         if (!remoteVersion || remoteVersion === localVersion) return;
         if (document.getElementById("splus-update-banner")) return;
