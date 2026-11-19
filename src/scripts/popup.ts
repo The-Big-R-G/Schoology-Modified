@@ -3,7 +3,3 @@ document.getElementById("open-messages")?.addEventListener("click", () => {
     window.close();
 });
 
-document.getElementById("open-browser")?.addEventListener("click", () => {
-    chrome.runtime.sendMessage({ type: "openBrowser" });
-    window.close();
-});

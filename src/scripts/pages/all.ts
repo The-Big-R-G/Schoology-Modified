@@ -60,7 +60,6 @@ export async function load() {
     await handleNewVersion();
     activateEasterEgg();
     addMessagesButton();
-    addWebBrowserButton();
     addDarkThemeToggleButton();
     addSplusSettingsButton();
     fixNavbarSvgIconColors();
@@ -123,23 +122,6 @@ function addMessagesButton() {
     );
 }
 
-function addWebBrowserButton() {
-    const navigation = document.querySelector<HTMLUListElement>(
-        "#header > header > nav > ul:nth-child(2)"
-    );
-    if (!navigation || document.getElementById("splus-web-browser-navbar-button")) return;
-    navigation.prepend(
-        createElement("li", ["_24avl", "_3Rh90", "_349XD"], {}, [
-            createElement("button", ["splus-messages-button"], {
-                id: "splus-web-browser-navbar-button",
-                textContent: "Web",
-                title: "Open Schoology Plus Web Browser",
-                onclick: () => chrome.runtime.sendMessage({ type: "openBrowser" }),
-            }),
-        ])
-    );
-}
-
 export async function preload() {
     Logger.log(
         `Loaded ${EXTENSION_NAME} version ${chrome.runtime.getManifest().version}${
@@ -184,20 +166,20 @@ function addVersionToProfileMenu() {
 }
 
 async function checkForGithubUpdate() {
-    const updateUrl = "https://raw.githubusercontent.com/The-Big-R-G/Schoology-Modified/main/package.json";
+    const updateUrl = "https://raw.githubusercontent.com/The-Big-R-G/Schoology-Modified/main/VERSION.txt";
     try {
         const response = await fetch(`${updateUrl}?t=${Date.now()}`, { cache: "no-store" });
         if (!response.ok) return;
-        const remotePackage = (await response.json()) as { version?: string };
+        const remoteVersion = (await response.text()).trim();
         const localVersion = chrome.runtime.getManifest().version;
-        if (!remotePackage.version || compareVersions(remotePackage.version, localVersion) <= 0) return;
+        if (!remoteVersion || remoteVersion === localVersion) return;
         if (document.getElementById("splus-update-banner")) return;
         const banner = createElement("div", ["splus-update-banner"], {
             id: "splus-update-banner",
             role: "status",
         }, [
-            createElement("strong", [], { textContent: "NOT UP TO DATE" }),
-            createElement("span", [], { textContent: ` GitHub has Schoology Plus v${remotePackage.version}.` }),
+            createElement("strong", [], { textContent: "OUT OF VERSION" }),
+            createElement("span", [], { textContent: ` Installed v${localVersion}; GitHub v${remoteVersion}.` }),
             createElement("a", [], {
                 href: "https://github.com/The-Big-R-G/Schoology-Modified",
                 target: "_blank",

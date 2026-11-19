@@ -110,77 +110,8 @@ function openMessagesInSchoology() {
     close.focus();
 }
 
-function openSchoologyBrowser() {
-    const existing = document.getElementById("splus-web-browser-overlay") as HTMLDialogElement | null;
-    if (existing) existing.close();
-    const overlay = document.createElement("dialog");
-    overlay.id = "splus-web-browser-overlay";
-    overlay.className = "splus-web-browser-overlay";
-    overlay.setAttribute("aria-label", "Schoology Plus Web Browser");
-    const panel = document.createElement("div");
-    panel.className = "splus-web-browser-panel";
-    const toolbar = document.createElement("form");
-    toolbar.className = "splus-web-browser-toolbar";
-    const address = document.createElement("input");
-    address.type = "url";
-    address.value = "https://www.google.com/webhp?igu=1";
-    address.setAttribute("aria-label", "Web address");
-    const go = document.createElement("button");
-    go.type = "submit";
-    go.textContent = "Go";
-    const openTab = document.createElement("button");
-    openTab.type = "button";
-    openTab.textContent = "Open tab";
-    openTab.title = "Open this address in a browser tab";
-    const close = document.createElement("button");
-    close.type = "button";
-    close.textContent = "×";
-    close.title = "Close browser";
-    const frame = document.createElement("iframe");
-    frame.className = "splus-web-browser-frame";
-    frame.src = address.value;
-    frame.title = "Web browser";
-    const navigate = () => {
-        try {
-            const url = new URL(address.value);
-            if (!/^https?:$/.test(url.protocol)) throw new Error("Only web addresses are supported");
-            // Most public sites (including TikTok) explicitly block iframe
-            // embedding. Navigate this tab instead of bypassing those protections
-            // or opening another tab.
-            window.location.assign(url.href);
-            overlay.close();
-            return;
-        } catch {
-            address.setCustomValidity("Enter a valid http or https address.");
-            address.reportValidity();
-            return;
-        }
-        address.setCustomValidity("");
-    };
-    toolbar.addEventListener("submit", event => {
-        event.preventDefault();
-        navigate();
-    });
-    close.addEventListener("click", () => overlay.close());
-    openTab.addEventListener("click", () => {
-        chrome.runtime.sendMessage({ type: "openBrowserTab", url: frame.src || address.value });
-    });
-    overlay.addEventListener("click", event => {
-        if (event.target === overlay) overlay.close();
-    });
-    overlay.addEventListener("close", () => overlay.remove());
-    toolbar.append(address, go, openTab, close);
-    panel.append(toolbar, frame);
-    overlay.append(panel);
-    document.body.append(overlay);
-    overlay.showModal();
-    address.focus();
-    address.select();
-}
-
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     if (request.type === "openMessagesInSchoology") openMessagesInSchoology();
-    else if (request.type === "openBrowserInSchoology") openSchoologyBrowser();
     else return;
     sendResponse({ success: true });
 });
