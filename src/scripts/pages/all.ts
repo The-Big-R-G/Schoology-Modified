@@ -323,6 +323,22 @@ function updateDefaultDomainSetting() {
 function pageModifications() {
     // Page Modifications
 
+    const removeGizmosTitle = () => {
+        for (const title of document.querySelectorAll<HTMLElement>("span.app-title")) {
+            if (title.textContent?.trim().toLowerCase() === "gizmos") title.remove();
+        }
+    };
+    removeGizmosTitle();
+    let gizmosCheckScheduled = false;
+    new MutationObserver(() => {
+        if (gizmosCheckScheduled) return;
+        gizmosCheckScheduled = true;
+        window.setTimeout(() => {
+            gizmosCheckScheduled = false;
+            removeGizmosTitle();
+        }, 100);
+    }).observe(document.body, { childList: true, subtree: true });
+
     document.head.appendChild(
         createElement("meta", [], {
             name: "viewport",
