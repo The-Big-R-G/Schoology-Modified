@@ -146,17 +146,29 @@ function addVersionToProfileMenu() {
         );
         const profileName = [...(profileButton?.querySelectorAll<HTMLElement>(".LGaPf") ?? [])]
             .find(element => !element.querySelector("svg") && element.textContent?.trim());
-        if (!profileName) return;
-        const version = profileName.querySelector<HTMLElement>(".splus-profile-inline-version")
-            ?? createElement("span", ["splus-profile-inline-version"]);
-        version.textContent = `v${chrome.runtime.getManifest().version}`;
-        if (!version.parentElement) profileName.append(version);
+        if (profileName) {
+            const version = profileName.querySelector<HTMLElement>(".splus-profile-inline-version")
+                ?? createElement("span", ["splus-profile-inline-version"]);
+            version.textContent = `v${chrome.runtime.getManifest().version}`;
+            if (!version.parentElement) profileName.append(version);
+        }
+
+        const settingsLink = document.querySelector<HTMLAnchorElement>('a[href="/settings/account"]');
+        const menu = settingsLink?.closest<HTMLElement>('[role="menu"], ul');
+        if (settingsLink && menu && !menu.querySelector(".splus-profile-version")) {
+            const menuVersion = createElement("div", ["splus-profile-version"], {
+                textContent: `Schoology Plus v${chrome.runtime.getManifest().version}`,
+            });
+            settingsLink.parentElement?.insertAdjacentElement("beforebegin", menuVersion);
+        }
     };
 
     addVersion();
     document.addEventListener("click", event => {
         if ((event.target as Element | null)?.closest('button[data-sgy-sitenav="nav-trigger"]')) {
             window.setTimeout(addVersion, 0);
+            window.setTimeout(addVersion, 250);
+            window.setTimeout(addVersion, 600);
         }
     });
 }
