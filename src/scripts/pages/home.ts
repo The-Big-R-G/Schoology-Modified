@@ -11,14 +11,8 @@ import { Settings } from "../utils/splus-settings";
 import { compareVersions } from "../utils/version";
 
 export async function load() {
-    loadBroadcasts();
     showAssignmentGradesInInbox();
     enableUpcomingAssignmentDrops();
-
-
-    setTimeout(() => {
-        reorderSidebar();
-    }, 500);
 }
 
 function enableUpcomingAssignmentDrops() {

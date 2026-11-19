@@ -155,7 +155,6 @@ async function load() {
 
     if (isGradesPage) {
         await pages.grades.load();
-        await pages.course.load();
     }
 
     if (matchPage(/^\/settings\/account$/)) {
@@ -170,16 +169,6 @@ async function load() {
         )
     ) {
         await pages.home.load();
-        await pages.course.load();
-    }
-
-    if (
-        !isGradesPage &&
-        matchPage(
-            /^\/course\/\d+/ // matches /course/1234(...)
-        )
-    ) {
-        await pages.course.load();
     }
 
     if (
@@ -188,23 +177,6 @@ async function load() {
         )
     ) {
         await pages.assessment.load();
-    }
-
-    if (
-        matchPage(
-            /^\/page\// // matches /page/(...)
-        )
-    ) {
-        await pages.page.load();
-    }
-
-    if (
-        matchPage(
-            /^\/courses/ // matches /courses(...)
-        )
-    ) {
-        await pages.course.load();
-        await pages.courses.load();
     }
 
     globalThis.SchoologyPlus = {
