@@ -89,7 +89,6 @@
     "activeTab",
     "scripting",
     "offscreen",
-    "downloads",
         "declarativeNetRequestWithHostAccess"
   ],
   "optional_permissions": [
@@ -98,8 +97,7 @@
   "host_permissions": [
     "*://*.schoology.com/*",
     "*://lms.lausd.net/*",
-    "https://*.supabase.co/*",
-    "https://raw.githubusercontent.com/*"
+    "https://*.supabase.co/*"
   ],
   "optional_host_permissions": [
     "*://*/*"
