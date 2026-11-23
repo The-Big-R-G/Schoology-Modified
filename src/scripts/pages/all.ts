@@ -55,6 +55,7 @@ const siteNavigationTileHelpers = {
 export async function load() {
     removeGizmosTitle();
     addMessagesButton();
+    addWhatIfGradesButton();
     addVersionToProfileMenu();
 }
 
@@ -104,6 +105,40 @@ function addMessagesButton() {
             ),
         ])
     );
+    chrome.storage.local.get("messagesUnreadCount").then(({ messagesUnreadCount }) => {
+        const button = document.getElementById("splus-messages-navbar-button");
+        if (button && messagesUnreadCount) button.textContent = `Messages (${messagesUnreadCount})`;
+    });
+}
+
+function addWhatIfGradesButton() {
+    const navigation = document.querySelector<HTMLUListElement>("#header > header > nav > ul:nth-child(2)");
+    if (!navigation || document.getElementById("splus-what-if-navbar-button")) return;
+    const item = document.createElement("li");
+    item.className = "_24avl _3Rh90 _349XD";
+    const button = document.createElement("button");
+    button.className = "_1SIMq _2kpZl _3OAXJ _13cCs _3_bfp _2M5aC _24avl _3v0y7 _2s0LQ _3ghFm _3LeCL _31GLY _9GDcm _1D8fw util-height-six-3PHnk util-line-height-six-3lFgd util-text-decoration-none-1n0lI Header-header-button-active-state-3AvBm Header-header-button-1EE8Y splus-what-if-navbar-button";
+    button.id = "splus-what-if-navbar-button";
+    button.textContent = "What-If Grades";
+    button.title = "Open the what-if grade calculator";
+    button.addEventListener("click", () => {
+        if (!/^\/grades\/grades$/.test(location.pathname)) {
+            location.href = "/grades/grades";
+            return;
+        }
+        const calculator = document.querySelector<HTMLElement>(".splus-what-if");
+        calculator?.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (!calculator) {
+            const course = document.querySelector<HTMLElement>(".gradebook-course");
+            if (course) {
+                course.dispatchEvent(new CustomEvent("splus-open-what-if"));
+                window.setTimeout(() => document.querySelector<HTMLElement>(".splus-what-if")?.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
+            } else showToast("What-if calculator", "Open a course with ungraded assignments first.", "#2d6cdf");
+        }
+    });
+    item.append(button);
+    const messages = document.getElementById("splus-messages-navbar-button")?.closest("li");
+    (messages || navigation.lastElementChild)?.insertAdjacentElement("afterend", item);
 }
 
 export async function preload() {

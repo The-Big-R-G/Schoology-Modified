@@ -1,4 +1,5 @@
 import "webext-dynamic-content-scripts";
+import { createClient } from "@supabase/supabase-js";
 import addDomainPermissionToggle from "webext-permission-toggle";
 
 import { getAnalyticsUserId } from "./utils/analytics";
@@ -14,6 +15,32 @@ import {
 var assignmentNotificationUrl = "https://app.schoology.com/home/notifications?filter=all";
 var defaultDomain = "app.schoology.com";
 const OFFSCREEN_DOCUMENT_PATH = "/offscreen.html";
+const MESSAGE_PROJECT = { url: "https://sksjloysptdwsbsgpgtg.supabase.co", key: "sb_publishable_RC8HNGWtcvSkMZDvYuzMiA_z35vBR-2" };
+
+async function updateMessageUnreadCount() {
+    const stored = await chrome.storage.local.get("messagesConfiguration");
+    const config = stored.messagesConfiguration || MESSAGE_PROJECT;
+    const storage = {
+        getItem: async (key: string) => (await chrome.storage.local.get(key))[key] ?? null,
+        setItem: async (key: string, value: string) => chrome.storage.local.set({ [key]: value }),
+        removeItem: async (key: string) => chrome.storage.local.remove(key),
+    };
+    const db = createClient(config.url, config.key, { auth: { storage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
+    const { data: { user } } = await db.auth.getUser();
+    if (!user) return;
+    const { data: memberships, error } = await db.from("conversation_members").select("conversation_id, last_read_at, hidden_at").eq("user_id", user.id).is("hidden_at", null);
+    if (error || !memberships?.length) return;
+    const ids = memberships.map(item => item.conversation_id);
+    const { data: messages } = await db.from("messages").select("id, conversation_id, sender_id, created_at").in("conversation_id", ids).neq("sender_id", user.id);
+    const { data: hidden } = await db.from("hidden_messages").select("message_id").eq("user_id", user.id);
+    const hiddenIds = new Set((hidden ?? []).map(item => item.message_id));
+    const reads = new Map(memberships.map(item => [item.conversation_id, item.last_read_at]));
+    const count = (messages ?? []).filter(item => !hiddenIds.has(item.id) && (!reads.get(item.conversation_id) || item.created_at > reads.get(item.conversation_id)!)).length;
+    await chrome.storage.local.set({ messagesUnreadCount: count });
+    chrome.tabs.query({ url: ["*://*.schoology.com/*", "https://lms.lausd.net/*"] }, tabs => {
+        for (const tab of tabs) if (tab.id) chrome.tabs.sendMessage(tab.id, { type: "messagesUnreadCount", count }).catch(() => {});
+    });
+}
 
 async function load() {
     addDomainPermissionToggle({ reloadOnSuccess: true });
@@ -41,6 +68,8 @@ async function load() {
             });
         }
     });
+    chrome.alarms.create("messages-unread", { periodInMinutes: 1 });
+    void updateMessageUnreadCount();
 
     chrome.notifications.onClicked.addListener(onNotificationClicked);
     chrome.action.setBadgeBackgroundColor({ color: [217, 0, 0, 255] });
@@ -94,6 +123,10 @@ function onNotificationClicked(id: string) {
 }
 
 async function onAlarm(alarm: chrome.alarms.Alarm) {
+    if (alarm.name === "messages-unread") {
+        try { await updateMessageUnreadCount(); } catch (error) { Logger.error("Unable to refresh unread messages", error); }
+        return;
+    }
     let storageContent = await chrome.storage.sync.get(null);
 
     if (alarm && alarm.name === "notification") {
@@ -171,6 +204,16 @@ function onMessage(
                 type: "openMessagesInSchoology",
             });
         })();
+        sendResponse({ success: true });
+        return true;
+    } else if (request.type === "messagesUnreadCount") {
+        const count = Math.max(0, Number(request.count) || 0);
+        chrome.action.setBadgeText({ text: count ? String(count) : "" });
+        chrome.action.setBadgeBackgroundColor({ color: "#d92d20" });
+        chrome.storage.local.set({ messagesUnreadCount: count });
+        chrome.tabs.query({ url: ["*://*.schoology.com/*", "https://lms.lausd.net/*"] }, tabs => {
+            for (const tab of tabs) if (tab.id) chrome.tabs.sendMessage(tab.id, { type: "messagesUnreadCount", count }).catch(() => {});
+        });
         sendResponse({ success: true });
         return true;
     } else if (request.type == "fetch" && request.url !== undefined) {

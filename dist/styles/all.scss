@@ -1698,6 +1698,22 @@ Should not be shown
     line-height: 18px;
 }
 
+.splus-what-if {
+    margin: 12px 0;
+    padding: 12px 14px;
+    border: 1px solid #c9d8e6;
+    border-radius: 4px;
+    background: #f5f9fc;
+    color: #293845;
+    font-size: 13px;
+}
+.splus-what-if-heading { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-bottom: 9px; }
+.splus-what-if-heading span { color: #647482; }
+.splus-what-if-fields { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.splus-what-if-fields label { display: flex; align-items: center; gap: 6px; max-width: 100%; }
+.splus-what-if-input { width: 70px; padding: 4px 6px; border: 1px solid #aebdca; border-radius: 3px; }
+.splus-what-if-result { display: flex; gap: 16px; margin-top: 10px; color: #176b2c; }
+
 .splus-upcoming-upload-target {
     position: relative;
     transition: outline-color 120ms ease, background-color 120ms ease;

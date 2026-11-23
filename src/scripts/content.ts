@@ -112,6 +112,10 @@ function openMessagesInSchoology() {
 
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     if (request.type === "openMessagesInSchoology") openMessagesInSchoology();
+    else if (request.type === "messagesUnreadCount") {
+        const button = document.getElementById("splus-messages-navbar-button");
+        if (button) button.textContent = request.count ? `Messages (${request.count})` : "Messages";
+    }
     else return;
     sendResponse({ success: true });
 });

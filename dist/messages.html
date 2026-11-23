@@ -8,10 +8,10 @@
 </head>
 <body>
   <main class="messages-shell">
-    <header><h1>Messages</h1><button id="sign-out" hidden>Sign out</button></header>
+    <header><div><span class="eyebrow">SCHOOLGY PLUS</span><h1>Messages</h1></div><button id="sign-out" hidden>Sign out</button></header>
     <p id="status" role="status"></p>
 
-    <section id="configuration">
+    <section id="configuration" hidden>
       <h2>Connect Messages</h2>
       <p>Enter your Supabase project URL and publishable key. These values identify the project; do not enter a service role key.</p>
       <label>Project URL <input id="supabase-url" type="url" placeholder="https://your-project.supabase.co" required></label>
@@ -27,8 +27,7 @@
     </section>
 
     <section id="inbox" hidden>
-      <form id="new-conversation"><label>Message username <input id="recipient" type="text" pattern="[A-Za-z0-9_]{3,30}" required></label><button>Start chat</button></form>
-      <div class="message-layout"><aside><h2>Conversations</h2><ul id="conversation-list"></ul></aside><section><h2 id="conversation-title">Choose a conversation</h2><ol id="message-list" aria-live="polite"></ol><form id="message-form" hidden><label class="visually-hidden" for="message-body">Message</label><textarea id="message-body" maxlength="2000" required></textarea><button>Send</button></form></section></div>
+      <div class="message-layout"><aside><div class="conversation-heading"><h2>Chats</h2><button id="new-chat-toggle" type="button" title="Start a new chat">＋</button></div><form id="new-conversation" hidden><label>Chat type<select id="chat-type"><option value="direct">Direct message</option><option value="group">Group chat</option></select></label><label id="direct-recipient-label">Username<input id="recipient" type="text" pattern="[A-Za-z0-9_]{3,30}" placeholder="@username"></label><div id="group-fields" hidden><label>Group name<input id="group-title" type="text" maxlength="80" placeholder="Study group"></label><label>People (comma separated usernames)<input id="group-recipients" type="text" placeholder="alex, sam"></label></div><button>Start chat</button></form><ul id="conversation-list"></ul></aside><section class="chat-pane"><div id="chat-placeholder"><span class="placeholder-icon">✉</span><h2>Your messages</h2><p>Choose a conversation or start a new chat.</p></div><div id="active-chat" hidden><div class="chat-heading"><div class="avatar" id="chat-avatar">?</div><div class="chat-heading-details"><h2 id="conversation-title">Choose a conversation</h2><span id="chat-presence" class="chat-presence">Direct message</span></div><button id="delete-conversation" type="button" title="Hide this conversation for you">Delete conversation</button></div><ol id="message-list" aria-live="polite"></ol><form id="message-form" hidden><label class="visually-hidden" for="message-body">Message</label><textarea id="message-body" maxlength="2000" placeholder="Write a message…" required></textarea><button aria-label="Send message">Send <span>➤</span></button></form></div></section></div>
     </section>
   </main>
   <script src="messages.js"></script>
