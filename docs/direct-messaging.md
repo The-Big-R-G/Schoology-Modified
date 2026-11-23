@@ -8,8 +8,26 @@ This extension now includes a user-visible Messages page. It keeps the realtime 
 2. Run `supabase/migrations/20261117000000_create_direct_messages.sql` in the project SQL editor, or create and apply the migration with the Supabase CLI.
 3. Confirm that `messages` is included in the `supabase_realtime` publication. The migration adds it for a new project.
 4. Open the extension popup and choose **Open Messages**.
-5. Enter the project URL and its publishable key. Never enter a service role or secret key.
+5. The included Messages page is preconfigured for the Schoology-Modified project. Never enter a service-role or secret key in the extension.
 6. Create two test accounts with distinct usernames, then start a chat by username.
+
+## Creating accounts from Terminal
+
+The account command runs only on your computer and uses a Supabase service-role key. That key has full database access: never put it in extension code, Git, screenshots, or a shared terminal history.
+
+Add the service-role key to the local `.env` file (it is already Git-ignored):
+
+```sh
+SUPABASE_SERVICE_ROLE_KEY='your-service-role-key'
+```
+
+Then, in the project folder, run:
+
+```sh
+npm run create:message-user -- username 'strong-password'
+```
+
+It creates a confirmed account and its matching profile, so no confirmation email is sent or required. Running it again for the same username resets that account's password. Retrieve the service-role key only from the project dashboard under **Settings → API**. The publishable key will not work for this command.
 
 ## Security model
 

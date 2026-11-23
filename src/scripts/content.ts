@@ -26,6 +26,104 @@ function ready() {
     });
 }
 
+function makeMessagesPanelDraggable(panel: HTMLElement, titlebar: HTMLElement) {
+    let drag: { pointerId: number; offsetX: number; offsetY: number } | null = null;
+    titlebar.addEventListener("pointerdown", event => {
+        if ((event.target as HTMLElement).closest("button")) return;
+        const bounds = panel.getBoundingClientRect();
+        drag = { pointerId: event.pointerId, offsetX: event.clientX - bounds.left, offsetY: event.clientY - bounds.top };
+        titlebar.setPointerCapture(event.pointerId);
+        event.preventDefault();
+    });
+    titlebar.addEventListener("pointermove", event => {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        const bounds = panel.getBoundingClientRect();
+        const left = Math.max(0, Math.min(window.innerWidth - bounds.width, event.clientX - drag.offsetX));
+        const top = Math.max(0, Math.min(window.innerHeight - bounds.height, event.clientY - drag.offsetY));
+        panel.style.left = `${left}px`;
+        panel.style.top = `${top}px`;
+    });
+    titlebar.addEventListener("pointerup", event => {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        titlebar.releasePointerCapture(event.pointerId);
+        drag = null;
+    });
+}
+
+function openMessagesInSchoology() {
+    const existing = document.getElementById("splus-messages-overlay") as HTMLDialogElement | null;
+    if (existing) existing.close();
+    const overlay = document.createElement("dialog");
+    overlay.id = "splus-messages-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Schoology Plus Messages");
+
+    const panel = document.createElement("div");
+    panel.className = "splus-messages-panel";
+    const titlebar = document.createElement("div");
+    titlebar.className = "splus-messages-titlebar";
+    const title = document.createElement("strong");
+    title.textContent = "Messages";
+    const controls = document.createElement("div");
+    controls.className = "splus-messages-controls";
+    const minimize = document.createElement("button");
+    minimize.className = "splus-messages-control";
+    minimize.type = "button";
+    minimize.textContent = "−";
+    minimize.title = "Minimize Messages";
+    minimize.setAttribute("aria-label", "Minimize Messages");
+    const close = document.createElement("button");
+    close.className = "splus-messages-control";
+    close.type = "button";
+    close.textContent = "×";
+    close.title = "Close Messages";
+    close.setAttribute("aria-label", "Close Messages");
+    close.addEventListener("click", () => overlay.close());
+    minimize.addEventListener("click", () => {
+        const minimized = panel.classList.toggle("splus-messages-minimized");
+        minimize.textContent = minimized ? "□" : "−";
+        minimize.title = minimized ? "Restore Messages" : "Minimize Messages";
+        minimize.setAttribute("aria-label", minimize.title);
+    });
+    controls.append(minimize, close);
+    titlebar.append(title, controls);
+    const frame = document.createElement("iframe");
+    frame.className = "splus-messages-frame";
+    frame.src = chrome.runtime.getURL("messages.html");
+    frame.title = "Schoology Plus Messages";
+    panel.append(titlebar, frame);
+    overlay.append(panel);
+    overlay.addEventListener("click", event => {
+        if (event.target === overlay) overlay.close();
+    });
+    overlay.addEventListener("close", () => overlay.remove());
+    document.body.append(overlay);
+    overlay.showModal();
+    const width = Math.min(880, Math.max(320, window.innerWidth - 48));
+    const height = Math.min(680, Math.max(240, window.innerHeight - 48));
+    panel.style.width = `${width}px`;
+    panel.style.height = `${height}px`;
+    panel.style.left = `${Math.max(0, (window.innerWidth - width) / 2)}px`;
+    panel.style.top = `${Math.max(0, (window.innerHeight - height) / 2)}px`;
+    makeMessagesPanelDraggable(panel, titlebar);
+    close.focus();
+}
+
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+    if (request.type === "openMessagesInSchoology") openMessagesInSchoology();
+    else if (request.type === "messagesUnreadCount") {
+        const button = document.getElementById("splus-messages-navbar-button");
+        if (button) button.textContent = request.count ? `Messages (${request.count})` : "Messages";
+    }
+    else return;
+    sendResponse({ success: true });
+});
+
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape") (document.getElementById("splus-messages-overlay") as HTMLDialogElement | null)?.close();
+});
+
 async function load() {
     Logger.debug(`Current value of SchoologyPlus variable:`, globalThis.SchoologyPlus);
 
@@ -61,7 +159,6 @@ async function load() {
 
     if (isGradesPage) {
         await pages.grades.load();
-        await pages.course.load();
     }
 
     if (matchPage(/^\/settings\/account$/)) {
@@ -72,20 +169,10 @@ async function load() {
         matchPage(
             /^\/$/, // matches /
             /^\/home$/, // matches /home
-            /^\/home\/(recent-activity|course-dashboard)$/ // matches /home/recent-activity and /home/course-dashboard
+            /^\/home\/(recent-activity|course-dashboard|notifications)$/ // matches home dashboard and notification inbox pages
         )
     ) {
         await pages.home.load();
-        await pages.course.load();
-    }
-
-    if (
-        !isGradesPage &&
-        matchPage(
-            /^\/course\/\d+/ // matches /course/1234(...)
-        )
-    ) {
-        await pages.course.load();
     }
 
     if (
@@ -94,23 +181,6 @@ async function load() {
         )
     ) {
         await pages.assessment.load();
-    }
-
-    if (
-        matchPage(
-            /^\/page\// // matches /page/(...)
-        )
-    ) {
-        await pages.page.load();
-    }
-
-    if (
-        matchPage(
-            /^\/courses/ // matches /courses(...)
-        )
-    ) {
-        await pages.course.load();
-        await pages.courses.load();
     }
 
     globalThis.SchoologyPlus = {
